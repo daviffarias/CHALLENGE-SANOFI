@@ -72,6 +72,21 @@ header {
     animation: slideInUp 1s ease-out;
 }
 
+/* Estilos para animação ao passar o mouse */
+.feature h3, .feature p {
+    transition: transform 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.feature:hover h3, .feature:hover p {
+    transform: scale(1.1);
+    color: #6a11cb;
+}
+
+/* Adicionando uma sombra ao passar o mouse */
+.feature:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
 .contact-form {
     background: linear-gradient(to right, #6a11cb, #2575fc);
     padding: 2rem 1rem;
