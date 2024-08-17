@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 participantes.add(nome);
             }
         });
-
+    
         todosOsParticipantes = new Set(participantes);
         participantesSelects.forEach(select => {
             const currentSelected = new Set(select.getValue(true));
@@ -28,7 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 selected: currentSelected.has(nome),
             }));
             select.clearStore();
-            select.setChoices(updatedChoices, 'value', 'label', true);
+            select.setChoices(updatedChoices, 'value', 'label', false);
+            
+            // Reseleciona apenas os participantes que estavam selecionados anteriormente
+            currentSelected.forEach(nome => {
+                if (todosOsParticipantes.has(nome)) {
+                    select.setChoiceByValue(nome);
+                }
+            });
         });
     }
 
@@ -36,14 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const valorSelecionado = selectModificado.getValue(true);
         participantesSelects.forEach(select => {
             if (select !== selectModificado) {
-                const choicesInstance = participantesSelects.find(choice => choice.passedElement.element === select);
+                const choicesInstance = select;
                 if (choicesInstance) {
-                    const valoresAtivamenteSelecionadosNoOutroSelect = valorSelecionado;
-                    choicesInstance.removeActiveItemsByValue(valoresAtivamenteSelecionadosNoOutroSelect);
+                    // Remove os participantes selecionados na lista atual da outra lista
+                    valorSelecionado.forEach(valor => {
+                        choicesInstance.removeActiveItemsByValue(valor);
+                    });
                 }
             }
         });
-
+    
         atualizarParticipantesDisponiveis();
     }
 
@@ -56,6 +65,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function removerParticipante(nome) {
         todosOsParticipantes.delete(nome);
+        
+        // Remover o participante de todas as listas de atividades
+        participantesSelects.forEach(select => {
+            const choicesInstance = select;
+            if (choicesInstance) {
+                choicesInstance.removeActiveItemsByValue(nome);
+            }
+        });
+        
         atualizarParticipantesDisponiveis();
     }
 
