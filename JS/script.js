@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 participantes.add(nome);
             }
         });
-    
+
         todosOsParticipantes = new Set(participantes);
         participantesSelects.forEach(select => {
             const currentSelected = new Set(select.getValue(true));
@@ -29,8 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
             select.clearStore();
             select.setChoices(updatedChoices, 'value', 'label', false);
-            
-            // Reseleciona apenas os participantes que estavam selecionados anteriormente
+
             currentSelected.forEach(nome => {
                 if (todosOsParticipantes.has(nome)) {
                     select.setChoiceByValue(nome);
@@ -45,14 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (select !== selectModificado) {
                 const choicesInstance = select;
                 if (choicesInstance) {
-                    // Remove os participantes selecionados na lista atual da outra lista
                     valorSelecionado.forEach(valor => {
                         choicesInstance.removeActiveItemsByValue(valor);
                     });
                 }
             }
         });
-    
+
         atualizarParticipantesDisponiveis();
     }
 
@@ -60,50 +58,69 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!todosOsParticipantes.has(nome)) {
             todosOsParticipantes.add(nome);
             atualizarParticipantesDisponiveis();
+            localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
         }
     }
 
     function removerParticipante(nome) {
         todosOsParticipantes.delete(nome);
-        
-        // Remover o participante de todas as listas de atividades
+
         participantesSelects.forEach(select => {
             const choicesInstance = select;
             if (choicesInstance) {
                 choicesInstance.removeActiveItemsByValue(nome);
             }
         });
-        
+
         atualizarParticipantesDisponiveis();
+        localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
     }
 
-    form.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', validateForm);
-    });
-
-    document.getElementById('adicionarParticipante').addEventListener('click', () => {
+    function criarParticipanteDiv(nome = '', tipo = 'expert') {
         const participanteDiv = document.createElement('div');
         participanteDiv.classList.add('participante');
+    
         participanteDiv.innerHTML = `
             <label for="nomeParticipante">Nome:</label>
-            <input type="text" name="nomeParticipante">
+            <input type="text" name="nomeParticipante" value="${nome}">
             <label for="tipoParticipante">Tipo:</label>
             <select name="tipoParticipante">
-                <option value="expert">Expert</option>
-                <option value="externo">Externo</option>
+                <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
+                <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
             </select>
             <button type="button" class="removerParticipante">Remover Participante</button>
+            <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
         `;
-        document.getElementById('listaParticipantes').appendChild(participanteDiv);
-
+    
         const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
+        const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
+        const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
+    
+        // Função para atualizar o estado do botão
+        function verificarCondicoes() {
+            const nome = nomeInput.value.trim();
+            const tipo = tipoSelect.value;
+            abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+        }
+    
+        // Configurar eventos
         nomeInput.addEventListener('blur', () => {
             const nome = nomeInput.value.trim();
             if (nome) {
                 adicionarParticipante(nome);
             }
+            verificarCondicoes();
         });
-
+    
+        tipoSelect.addEventListener('change', verificarCondicoes);
+    
+        abrirFormularioBtn.addEventListener('click', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}&expertType=${encodeURIComponent(tipoSelect.value)}`;
+            }
+        });
+    
         participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
             const nome = nomeInput.value.trim();
             if (nome) {
@@ -111,6 +128,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 participanteDiv.remove();
             }
         });
+    
+        verificarCondicoes();
+        document.getElementById('listaParticipantes').appendChild(participanteDiv);
+    }
+    
+
+    // Carrega os participantes armazenados ao carregar a página
+    const participantesArmazenados = JSON.parse(localStorage.getItem('participantes')) || [];
+    participantesArmazenados.forEach(nome => {
+        criarParticipanteDiv(nome);
+    });
+
+    form.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', validateForm);
+    });
+
+    document.getElementById('adicionarParticipante').addEventListener('click', () => {
+        criarParticipanteDiv();
     });
 
     document.getElementById('adicionarAtividade').addEventListener('click', () => {
@@ -162,14 +197,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    downloadButton.addEventListener('click', () => {
+    downloadButton.addEventListener('click', async () => {
         const nomeEvento = document.getElementById('nomeEvento').value.trim();
         const dataEvento = document.getElementById('dataEvento').value.trim();
 
         const participantes = [];
         document.querySelectorAll('.participante').forEach(participanteDiv => {
             const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
-            const tipo = participanteDiv.querySelector('select[name="tipoParticipante"]').value.trim();
+            const tipo = participanteDiv.querySelector('select[name="tipoParticipante"]').value;
             participantes.push({ nome, tipo });
         });
 
@@ -181,38 +216,113 @@ document.addEventListener('DOMContentLoaded', () => {
             const teveRefeicao = atividadeDiv.querySelector('input[name="teveRefeicao"]').checked;
             const palestrantes = Array.from(atividadeDiv.querySelector('select[name="palestrantes"]').selectedOptions).map(option => option.value);
             const outrosParticipantes = Array.from(atividadeDiv.querySelector('select[name="outrosParticipantes"]').selectedOptions).map(option => option.value);
+
             atividades.push({ descricao, salaLink, dataHora, teveRefeicao, palestrantes, outrosParticipantes });
         });
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(`Evento: ${nomeEvento}`, 10, 10);
-        doc.text(`Data: ${dataEvento}`, 10, 20);
-
-        let currentY = 30;
-        doc.text("Participantes:", 10, currentY);
-        currentY += 10;
-        participantes.forEach(participante => {
-            doc.text(`- ${participante.nome} (${participante.tipo})`, 10, currentY);
-            currentY += 10;
-        });
-
-        currentY += 10;
-        doc.text("Agenda:", 10, currentY);
-        currentY += 10;
-        atividades.forEach(atividade => {
-            doc.text(`- ${atividade.descricao}`, 10, currentY);
-            doc.text(`  - Sala/Link: ${atividade.salaLink}`, 10, currentY + 5);
-            doc.text(`  - Data/Hora: ${atividade.dataHora}`, 10, currentY + 10);
-            doc.text(`  - Refeição: ${atividade.teveRefeicao ? 'Sim' : 'Não'}`, 10, currentY + 15);
-            doc.text(`   - Palestrantes: ${atividade.palestrantes.join(', ')}`, 10, currentY + 20);
-            doc.text(`   - Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, 10, currentY + 25);
-            currentY += 35;
-        });
-
-        doc.save('dados_combinados.pdf');
+        await gerarPDF({ nomeEvento, dataEvento, participantes, atividades });
     });
 
-    validateForm();
-    atualizarParticipantesDisponiveis();
+    async function gerarPDF() {
+        const { PDFDocument, rgb } = PDFLib;
+    
+        // Coletar dados do formulário
+        const nomeEvento = document.getElementById('nomeEvento').value || '';
+        const localEvento = document.getElementById('localEvento').value || '';
+        const dataEvento = document.getElementById('dataEvento').value || '';
+        const nomeSolicitante = document.getElementById('nomeSolicitante').value || '';
+        const unidade = document.getElementById('unidade').value || '';
+        const racionalEvento = document.getElementById('racionalEvento').value || '';
+        const comentariosObservacoes = document.getElementById('comentariosObservacoes').value || '';
+    
+        // Verifique se há participantes
+        const participantes = Array.from(document.querySelectorAll('#listaParticipantes .participante')).map(participante => {
+            const nomeInput = participante.querySelector('input[name="nomeParticipante"]');
+            const tipoSelect = participante.querySelector('select[name="tipoParticipante"]');
+            return {
+                nome: nomeInput ? nomeInput.value.trim() : '',
+                tipo: tipoSelect ? tipoSelect.value : ''
+            };
+        });
+    
+        // Verifique se há atividades
+        const atividades = Array.from(document.querySelectorAll('#listaAtividades .atividade')).map(atividade => {
+            const descricaoInput = atividade.querySelector('input[name="descricaoAtividade"]');
+            const salaLinkInput = atividade.querySelector('input[name="salaLink"]');
+            const dataHoraInput = atividade.querySelector('input[name="dataHoraAtividade"]');
+            const teveRefeicaoCheckbox = atividade.querySelector('input[name="teveRefeicao"]');
+            const palestrantesSelect = atividade.querySelector('select[name="palestrantes"]');
+            const outrosParticipantesSelect = atividade.querySelector('select[name="outrosParticipantes"]');
+            
+            return {
+                descricao: descricaoInput ? descricaoInput.value.trim() : '',
+                salaLink: salaLinkInput ? salaLinkInput.value.trim() : '',
+                dataHora: dataHoraInput ? dataHoraInput.value.trim() : '',
+                teveRefeicao: teveRefeicaoCheckbox ? teveRefeicaoCheckbox.checked : false,
+                palestrantes: palestrantesSelect ? Array.from(palestrantesSelect.selectedOptions).map(option => option.value) : [],
+                outrosParticipantes: outrosParticipantesSelect ? Array.from(outrosParticipantesSelect.selectedOptions).map(option => option.value) : []
+            };
+        });
+    
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([600, 800]);
+        const { height } = page.getSize();
+    
+        let yOffset = height - 50;
+    
+        // Dados do Evento
+        page.drawText(`Nome do Evento: ${nomeEvento}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Local do Evento: ${localEvento}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Data do Evento: ${dataEvento}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Nome do Solicitante: ${nomeSolicitante}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Unidade: ${unidade}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Racional do Evento: ${racionalEvento}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
+        yOffset -= 40;
+        page.drawText(`Comentários ou Observações: ${comentariosObservacoes}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
+        yOffset -= 60;
+    
+        // Participantes
+        page.drawText('Participantes:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
+        yOffset -= 20;
+        participantes.forEach((participante, index) => {
+            page.drawText(`Nome: ${participante.nome} - Tipo: ${participante.tipo}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+        });
+    
+        // Agenda
+        page.drawText('Agenda:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
+        yOffset -= 20;
+        atividades.forEach((atividade, index) => {
+            page.drawText(`Descrição: ${atividade.descricao}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Sala/Link: ${atividade.salaLink}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Data e Hora: ${atividade.dataHora}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Teve Refeição: ${atividade.teveRefeicao ? 'Sim' : 'Não'}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Palestrantes: ${atividade.palestrantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 40;
+        });
+    
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+    
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'evento.pdf';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    
+    
 });
