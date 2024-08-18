@@ -1,166 +1,188 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('eventForm');
-    const downloadButton = document.getElementById('downloadPDF');
-    const participantesSelects = [];
-    let todosOsParticipantes = new Set();
 
-    function validateForm() {
-        const nomeEvento = document.getElementById('nomeEvento').value.trim();
-        const dataEvento = document.getElementById('dataEvento').value.trim();
-        downloadButton.disabled = !(nomeEvento && dataEvento);
-    }
+const form = document.getElementById('eventForm');
+const downloadButton = document.getElementById('downloadPDF');
+const participantesSelects = [];
+let todosOsParticipantes = new Set();
+let savedData = { participantes: [] };
 
-    function atualizarParticipantesDisponiveis() {
-        const participantes = new Set();
-        document.querySelectorAll('.participante').forEach(participanteDiv => {
-            const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
-            if (nome) {
-                participantes.add(nome);
-            }
-        });
-    
-        todosOsParticipantes = new Set(participantes);
-        participantesSelects.forEach(select => {
-            const currentSelected = new Set(select.getValue(true));
-            const updatedChoices = Array.from(todosOsParticipantes).map(nome => ({
-                value: nome,
-                label: nome,
-                selected: currentSelected.has(nome),
-            }));
-            select.clearStore();
-            select.setChoices(updatedChoices, 'value', 'label', false);
-            
-            // Reseleciona apenas os participantes que estavam selecionados anteriormente
-            currentSelected.forEach(nome => {
-                if (todosOsParticipantes.has(nome)) {
-                    select.setChoiceByValue(nome);
-                }
-            });
-        });
-    }
+function validateForm() {
+    const requiredFields = [
+        'nomeEvento', 'dataEvento', 'localEvento',
+        'nomeSolicitante', 'unidade'
+    ];
+    const allFieldsFilled = requiredFields.every(id =>
+        document.getElementById(id).value.trim()
+    );
+    downloadButton.disabled = !allFieldsFilled;
+}
 
-    function atualizarParticipantesNoFormulario(selectModificado) {
-        const valorSelecionado = selectModificado.getValue(true);
-        participantesSelects.forEach(select => {
-            if (select !== selectModificado) {
-                const choicesInstance = select;
-                if (choicesInstance) {
-                    // Remove os participantes selecionados na lista atual da outra lista
-                    valorSelecionado.forEach(valor => {
-                        choicesInstance.removeActiveItemsByValue(valor);
-                    });
-                }
-            }
-        });
-    
-        atualizarParticipantesDisponiveis();
-    }
-
-    function adicionarParticipante(nome) {
-        if (!todosOsParticipantes.has(nome)) {
-            todosOsParticipantes.add(nome);
-            atualizarParticipantesDisponiveis();
+function atualizarParticipantesDisponiveis() {
+    const participantes = new Set();
+    document.querySelectorAll('.participante').forEach(participanteDiv => {
+        const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
+        if (nome) {
+            participantes.add(nome);
         }
-    }
+    });
 
-    function removerParticipante(nome) {
-        todosOsParticipantes.delete(nome);
-        
-        // Remover o participante de todas as listas de atividades
-        participantesSelects.forEach(select => {
-            const choicesInstance = select;
-            if (choicesInstance) {
-                choicesInstance.removeActiveItemsByValue(nome);
+    todosOsParticipantes = new Set(participantes);
+    participantesSelects.forEach(select => {
+        const currentSelected = new Set(select.getValue(true));
+        const updatedChoices = Array.from(todosOsParticipantes).map(nome => ({
+            value: nome,
+            label: nome,
+            selected: currentSelected.has(nome),
+        }));
+        select.clearStore();
+        select.setChoices(updatedChoices, 'value', 'label', false);
+
+        currentSelected.forEach(nome => {
+            if (todosOsParticipantes.has(nome)) {
+                select.setChoiceByValue(nome);
             }
         });
-        
+    });
+}
+
+function adicionarParticipante(nome, tipo) {
+    if (!todosOsParticipantes.has(nome)) {
+        todosOsParticipantes.add(nome);
         atualizarParticipantesDisponiveis();
     }
+    savedData.participantes.push({ nome, tipo });
+    localStorage.setItem('formData', JSON.stringify(savedData));
+}
 
-    form.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', validateForm);
+document.getElementById('adicionarParticipante').addEventListener('click', () => {
+    const participanteDiv = document.createElement('div');
+    participanteDiv.classList.add('participante');
+    participanteDiv.innerHTML = `
+        <label for="nomeParticipante">Nome:</label>
+        <input type="text" name="nomeParticipante">
+        <label for="tipoParticipante">Tipo:</label>
+        <select name="tipoParticipante">
+            <option value="Expert Externo">Expert Externo</option>
+            <option value="Staff Interno">Staff Interno</option>
+        </select>
+        <button type="button" class="removerParticipante">Remover Participante</button>
+        <button type="button" class="abrirFormPagamento" disabled>Abrir Formulário de Pagamento</button>
+    `;
+    document.getElementById('listaParticipantes').appendChild(participanteDiv);
+
+    const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
+    const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
+    const abrirFormButton = participanteDiv.querySelector('.abrirFormPagamento');
+
+    nomeInput.addEventListener('input', () => {
+        if (nomeInput.value.trim() && tipoSelect.value === 'Expert Externo') {
+            abrirFormButton.disabled = false;
+        } else {
+            abrirFormButton.disabled = true;
+        }
     });
 
-    document.getElementById('adicionarParticipante').addEventListener('click', () => {
-        const participanteDiv = document.createElement('div');
-        participanteDiv.classList.add('participante');
-        participanteDiv.innerHTML = `
-            <label for="nomeParticipante">Nome:</label>
-            <input type="text" name="nomeParticipante">
-            <label for="tipoParticipante">Tipo:</label>
-            <select name="tipoParticipante">
-                <option value="expert">Expert</option>
-                <option value="externo">Externo</option>
-            </select>
-            <button type="button" class="removerParticipante">Remover Participante</button>
-        `;
-        document.getElementById('listaParticipantes').appendChild(participanteDiv);
-
-        const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
-        nomeInput.addEventListener('blur', () => {
-            const nome = nomeInput.value.trim();
-            if (nome) {
-                adicionarParticipante(nome);
-            }
-        });
-
-        participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
-            const nome = nomeInput.value.trim();
-            if (nome) {
-                removerParticipante(nome);
-                participanteDiv.remove();
-            }
-        });
+    tipoSelect.addEventListener('change', () => {
+        if (nomeInput.value.trim() && tipoSelect.value === 'Expert Externo') {
+            abrirFormButton.disabled = false;
+        } else {
+            abrirFormButton.disabled = true;
+        }
     });
 
-    document.getElementById('adicionarAtividade').addEventListener('click', () => {
-        const atividadeDiv = document.createElement('div');
-        atividadeDiv.classList.add('atividade');
-        atividadeDiv.innerHTML = `
-            <label for="descricaoAtividade">Descrição da Atividade:</label>
-            <input type="text" name="descricaoAtividade">
-            <label for="salaLink">Sala ou Link:</label>
-            <input type="text" name="salaLink">
-            <label for="dataHoraAtividade">Data e Horário:</label>
-            <input type="datetime-local" name="dataHoraAtividade">
-            <label for="teveRefeicao">Teve Refeição?</label>
-            <input type="checkbox" name="teveRefeicao">
-            <label for="palestrantes">Palestrantes (Computam Horas):</label>
-            <select name="palestrantes" multiple></select>
-            <label for="outrosParticipantes">Outros Participantes:</label>
-            <select name="outrosParticipantes" multiple></select>
-            <button type="button" class="removerAtividade">Remover Atividade</button>
-        `;
+    abrirFormButton.addEventListener('click', () => {
+        const nome = nomeInput.value.trim();
+        const tipo = tipoSelect.value;
 
-        document.getElementById('listaAtividades').appendChild(atividadeDiv);
+        if (nome && tipo === 'Expert Externo') {
+            adicionarParticipante(nome, tipo);
+            
+            // Salva o estado atual do formulário de evento
+            const eventDetails = {
+                nomeEvento: document.getElementById('nomeEvento').value,
+                dataEvento: document.getElementById('dataEvento').value,
+                localEvento: document.getElementById('localEvento').value,
+                nomeSolicitante: document.getElementById('nomeSolicitante').value,
+                unidade: document.getElementById('unidade').value,
+                participantes: savedData.participantes
+            };
+            localStorage.setItem('eventDetails', JSON.stringify(eventDetails));
 
-        const palestrantesSelect = atividadeDiv.querySelector('select[name="palestrantes"]');
-        const outrosParticipantesSelect = atividadeDiv.querySelector('select[name="outrosParticipantes"]');
+            window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}&tipo=${encodeURIComponent(tipo)}`;
+        }
+    });
 
-        const choicesPalestrantes = new Choices(palestrantesSelect, { removeItemButton: true, allowHTML: true });
-        const choicesOutrosParticipantes = new Choices(outrosParticipantesSelect, { removeItemButton: true, allowHTML: true });
+    participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
+        const nome = nomeInput.value.trim();
+        if (nome) {
+            removerParticipante(nome);
+            participanteDiv.remove();
+        }
+    });
+});
 
-        participantesSelects.push(choicesPalestrantes, choicesOutrosParticipantes);
 
-        setTimeout(() => {
-            atualizarParticipantesDisponiveis();
+function restoreFormData() {
+    const storedData = localStorage.getItem('formData');
+    const eventDetails = JSON.parse(localStorage.getItem('eventDetails'));
+    const payments = JSON.parse(localStorage.getItem('payments')) || {};
 
-            palestrantesSelect.addEventListener('change', () => {
-                atualizarParticipantesNoFormulario(choicesPalestrantes);
+    if (storedData) {
+        savedData = JSON.parse(storedData);
+        savedData.participantes.forEach(participante => {
+            const participanteDiv = document.createElement('div');
+            participanteDiv.classList.add('participante');
+            participanteDiv.innerHTML = `
+                <label for="nomeParticipante">Nome:</label>
+                <input type="text" name="nomeParticipante" value="${participante.nome}">
+                <label for="tipoParticipante">Tipo:</label>
+                <select name="tipoParticipante">
+                    <option value="Expert Externo" ${participante.tipo === 'Expert Externo' ? 'selected' : ''}>Expert Externo</option>
+                    <option value="Staff Interno" ${participante.tipo === 'Staff Interno' ? 'selected' : ''}>Staff Interno</option>
+                </select>
+                <button type="button" class="removerParticipante">Remover Participante</button>
+                <button type="button" class="abrirFormPagamento" ${participante.tipo === 'Expert Externo' ? '' : 'disabled'}>Abrir Formulário de Pagamento</button>
+            `;
+            document.getElementById('listaParticipantes').appendChild(participanteDiv);
+
+            const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
+            const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
+            const abrirFormButton = participanteDiv.querySelector('.abrirFormPagamento');
+
+            abrirFormButton.addEventListener('click', () => {
+                if (nomeInput.value.trim() && tipoSelect.value === 'Expert Externo') {
+                    window.location.href = `payment-form.html?nome=${encodeURIComponent(nomeInput.value.trim())}&tipo=${encodeURIComponent(tipoSelect.value)}`;
+                }
             });
 
-            outrosParticipantesSelect.addEventListener('change', () => {
-                atualizarParticipantesNoFormulario(choicesOutrosParticipantes);
+            participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
+                const nome = nomeInput.value.trim();
+                if (nome) {
+                    removerParticipante(nome);
+                    participanteDiv.remove();
+                }
             });
-        }, 0);
 
-        atividadeDiv.querySelector('.removerAtividade').addEventListener('click', () => {
-            participantesSelects.splice(participantesSelects.indexOf(choicesPalestrantes), 1);
-            participantesSelects.splice(participantesSelects.indexOf(choicesOutrosParticipantes), 1);
-            atividadeDiv.remove();
-            atualizarParticipantesDisponiveis();
+            // Verificar se há pagamento salvo para este participante
+            if (payments[participante.nome]) {
+                abrirFormButton.disabled = false;
+            }
         });
-    });
+    }
+
+    if (eventDetails) {
+        document.getElementById('nomeEvento').value = eventDetails.nomeEvento;
+        document.getElementById('dataEvento').value = eventDetails.dataEvento;
+        document.getElementById('localEvento').value = eventDetails.localEvento;
+        document.getElementById('nomeSolicitante').value = eventDetails.nomeSolicitante;
+        document.getElementById('unidade').value = eventDetails.unidade;
+    }
+
+    validateForm();
+    atualizarParticipantesDisponiveis();
+}
+
+
 
     downloadButton.addEventListener('click', () => {
         const nomeEvento = document.getElementById('nomeEvento').value.trim();
@@ -214,5 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     validateForm();
+    restoreFormData();
     atualizarParticipantesDisponiveis();
 });

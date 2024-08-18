@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Pagamento do Expert</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <script defer src="JS/payment.js"></script>
+</head>
+<body>
+    <form id="paymentForm">
+        <section id="serviceInfo">
+            <h3>Informações do Serviço</h3>
+            <label for="requestorName">Nome do Solicitante:</label>
+            <input type="text" id="requestorName" name="requestorName" readonly>
+
+            <label for="sanofiEntity">Entidade Sanofi:</label>
+            <input type="text" id="sanofiEntity" name="sanofiEntity" readonly>
+
+            <label for="requestorCountry">País do Solicitante:</label>
+            <input type="text" id="requestorCountry" name="requestorCountry" readonly>
+
+            <label for="projectTitle">Título do Projeto:</label>
+            <input type="text" id="projectTitle" name="projectTitle" readonly>
+
+            <label for="serviceLocation">Localização do Serviço (País):</label>
+            <input type="text" id="serviceLocation" name="serviceLocation" readonly>
+
+            <label for="serviceDate">Data do Serviço:</label>
+            <input type="date" id="serviceDate" name="serviceDate" readonly>
+        </section>
+
+        <section id="contractDescription">
+            <h3>Descrição do Contrato</h3>
+            <label for="expertLastName">Sobrenome do Expert:</label>
+            <input type="text" id="expertLastName" name="expertLastName" readonly>
+
+            <label for="expertFirstName">Nome do Expert:</label>
+            <input type="text" id="expertFirstName" name="expertFirstName" readonly>
+
+            <label for="expertCountry">País de Prática:</label>
+            <input type="text" id="expertCountry" name="expertCountry" value="Brazil" readonly>
+
+            <label for="serviceType">Tipo de Serviço:</label>
+            <select id="serviceType" name="serviceType">
+                <option value="advisory board">Advisory Board</option>
+                <option value="clinical research activities">Clinical Research Activities</option>
+                <option value="consulting service">Consulting Service</option>
+                <!-- Adicione mais opções conforme necessário -->
+            </select>
+
+            <label for="role">Papel:</label>
+            <select id="role" name="role">
+                <option value="Speaker">Speaker</option>
+                <option value="Member">Member</option>
+                <option value="Chairman">Chairman</option>
+                <option value="Consultant">Consultant</option>
+                <option value="Standard">Standard</option>
+            </select>
+
+            <label for="expertLevel">Nível do Expert:</label>
+            <select id="expertLevel" name="expertLevel">
+                <option value="tier 1 specialist">Tier 1 Specialist</option>
+                <!-- Adicione mais níveis conforme necessário -->
+            </select>
+
+            <label for="hourlyRateBRL">Taxa por Hora (BRL):</label>
+            <input type="number" id="hourlyRateBRL" name="hourlyRateBRL">
+
+            <label for="hourlyRateUSD">Taxa por Hora (USD):</label>
+            <input type="number" id="hourlyRateUSD" name="hourlyRateUSD" readonly>
+
+            <label for="serviceDuration">Duração do Serviço (Horas):</label>
+            <input type="number" id="serviceDuration" name="serviceDuration" step="0.5">
+
+            <label for="preparationTime">Tempo de Preparação (Horas):</label>
+            <input type="number" id="preparationTime" name="preparationTime" step="0.5">
+
+            <!-- Adicione mais campos conforme necessário -->
+
+            <label for="additionalInfo">Informações Adicionais e/ou Justificativas:</label>
+            <textarea id="additionalInfo" name="additionalInfo"></textarea>
+        </section>
+
+        <button type="submit">Salvar</button>
+        <a href="formulario_evento.html" class="btn">Voltar à Agenda</a>
+    </form>
+</body>
+</html>
