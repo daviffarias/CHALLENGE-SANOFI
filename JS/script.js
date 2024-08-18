@@ -1,197 +1,210 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('eventForm');
+    const downloadButton = document.getElementById('downloadPDF');
+    const participantesSelects = [];
+    let todosOsParticipantes = new Set();
 
-const form = document.getElementById('eventForm');
-const downloadButton = document.getElementById('downloadPDF');
-const participantesSelects = [];
-let todosOsParticipantes = new Set();
-let savedData = { participantes: [] };
+    function validateForm() {
+        const nomeEvento = document.getElementById('nomeEvento').value.trim();
+        const dataEvento = document.getElementById('dataEvento').value.trim();
+        downloadButton.disabled = !(nomeEvento && dataEvento);
+    }
 
-function validateForm() {
-    const requiredFields = [
-        'nomeEvento', 'dataEvento', 'localEvento',
-        'nomeSolicitante', 'unidade'
-    ];
-    const allFieldsFilled = requiredFields.every(id =>
-        document.getElementById(id).value.trim()
-    );
-    downloadButton.disabled = !allFieldsFilled;
-}
-
-function atualizarParticipantesDisponiveis() {
-    const participantes = new Set();
-    document.querySelectorAll('.participante').forEach(participanteDiv => {
-        const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
-        if (nome) {
-            participantes.add(nome);
-        }
-    });
-
-    todosOsParticipantes = new Set(participantes);
-    participantesSelects.forEach(select => {
-        const currentSelected = new Set(select.getValue(true));
-        const updatedChoices = Array.from(todosOsParticipantes).map(nome => ({
-            value: nome,
-            label: nome,
-            selected: currentSelected.has(nome),
-        }));
-        select.clearStore();
-        select.setChoices(updatedChoices, 'value', 'label', false);
-
-        currentSelected.forEach(nome => {
-            if (todosOsParticipantes.has(nome)) {
-                select.setChoiceByValue(nome);
+    function atualizarParticipantesDisponiveis() {
+        const participantes = new Set();
+        document.querySelectorAll('.participante').forEach(participanteDiv => {
+            const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
+            if (nome) {
+                participantes.add(nome);
             }
         });
-    });
-}
 
-function adicionarParticipante(nome, tipo) {
-    if (!todosOsParticipantes.has(nome)) {
-        todosOsParticipantes.add(nome);
+        todosOsParticipantes = new Set(participantes);
+        participantesSelects.forEach(select => {
+            const currentSelected = new Set(select.getValue(true));
+            const updatedChoices = Array.from(todosOsParticipantes).map(nome => ({
+                value: nome,
+                label: nome,
+                selected: currentSelected.has(nome),
+            }));
+            select.clearStore();
+            select.setChoices(updatedChoices, 'value', 'label', false);
+
+            currentSelected.forEach(nome => {
+                if (todosOsParticipantes.has(nome)) {
+                    select.setChoiceByValue(nome);
+                }
+            });
+        });
+    }
+
+    function atualizarParticipantesNoFormulario(selectModificado) {
+        const valorSelecionado = selectModificado.getValue(true);
+        participantesSelects.forEach(select => {
+            if (select !== selectModificado) {
+                const choicesInstance = select;
+                if (choicesInstance) {
+                    valorSelecionado.forEach(valor => {
+                        choicesInstance.removeActiveItemsByValue(valor);
+                    });
+                }
+            }
+        });
+
         atualizarParticipantesDisponiveis();
     }
-    savedData.participantes.push({ nome, tipo });
-    localStorage.setItem('formData', JSON.stringify(savedData));
-}
 
-document.getElementById('adicionarParticipante').addEventListener('click', () => {
-    const participanteDiv = document.createElement('div');
-    participanteDiv.classList.add('participante');
-    participanteDiv.innerHTML = `
-        <label for="nomeParticipante">Nome:</label>
-        <input type="text" name="nomeParticipante">
-        <label for="tipoParticipante">Tipo:</label>
-        <select name="tipoParticipante">
-            <option value="Expert Externo">Expert Externo</option>
-            <option value="Staff Interno">Staff Interno</option>
-        </select>
-        <button type="button" class="removerParticipante">Remover Participante</button>
-        <button type="button" class="abrirFormPagamento" disabled>Abrir Formulário de Pagamento</button>
-    `;
-    document.getElementById('listaParticipantes').appendChild(participanteDiv);
-
-    const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
-    const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
-    const abrirFormButton = participanteDiv.querySelector('.abrirFormPagamento');
-
-    nomeInput.addEventListener('input', () => {
-        if (nomeInput.value.trim() && tipoSelect.value === 'Expert Externo') {
-            abrirFormButton.disabled = false;
-        } else {
-            abrirFormButton.disabled = true;
+    function adicionarParticipante(nome) {
+        if (!todosOsParticipantes.has(nome)) {
+            todosOsParticipantes.add(nome);
+            atualizarParticipantesDisponiveis();
+            localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
         }
-    });
+    }
 
-    tipoSelect.addEventListener('change', () => {
-        if (nomeInput.value.trim() && tipoSelect.value === 'Expert Externo') {
-            abrirFormButton.disabled = false;
-        } else {
-            abrirFormButton.disabled = true;
-        }
-    });
+    function removerParticipante(nome) {
+        todosOsParticipantes.delete(nome);
 
-    abrirFormButton.addEventListener('click', () => {
-        const nome = nomeInput.value.trim();
-        const tipo = tipoSelect.value;
-
-        if (nome && tipo === 'Expert Externo') {
-            adicionarParticipante(nome, tipo);
-            
-            // Salva o estado atual do formulário de evento
-            const eventDetails = {
-                nomeEvento: document.getElementById('nomeEvento').value,
-                dataEvento: document.getElementById('dataEvento').value,
-                localEvento: document.getElementById('localEvento').value,
-                nomeSolicitante: document.getElementById('nomeSolicitante').value,
-                unidade: document.getElementById('unidade').value,
-                participantes: savedData.participantes
-            };
-            localStorage.setItem('eventDetails', JSON.stringify(eventDetails));
-
-            window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}&tipo=${encodeURIComponent(tipo)}`;
-        }
-    });
-
-    participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
-        const nome = nomeInput.value.trim();
-        if (nome) {
-            removerParticipante(nome);
-            participanteDiv.remove();
-        }
-    });
-});
-
-
-function restoreFormData() {
-    const storedData = localStorage.getItem('formData');
-    const eventDetails = JSON.parse(localStorage.getItem('eventDetails'));
-    const payments = JSON.parse(localStorage.getItem('payments')) || {};
-
-    if (storedData) {
-        savedData = JSON.parse(storedData);
-        savedData.participantes.forEach(participante => {
-            const participanteDiv = document.createElement('div');
-            participanteDiv.classList.add('participante');
-            participanteDiv.innerHTML = `
-                <label for="nomeParticipante">Nome:</label>
-                <input type="text" name="nomeParticipante" value="${participante.nome}">
-                <label for="tipoParticipante">Tipo:</label>
-                <select name="tipoParticipante">
-                    <option value="Expert Externo" ${participante.tipo === 'Expert Externo' ? 'selected' : ''}>Expert Externo</option>
-                    <option value="Staff Interno" ${participante.tipo === 'Staff Interno' ? 'selected' : ''}>Staff Interno</option>
-                </select>
-                <button type="button" class="removerParticipante">Remover Participante</button>
-                <button type="button" class="abrirFormPagamento" ${participante.tipo === 'Expert Externo' ? '' : 'disabled'}>Abrir Formulário de Pagamento</button>
-            `;
-            document.getElementById('listaParticipantes').appendChild(participanteDiv);
-
-            const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
-            const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
-            const abrirFormButton = participanteDiv.querySelector('.abrirFormPagamento');
-
-            abrirFormButton.addEventListener('click', () => {
-                if (nomeInput.value.trim() && tipoSelect.value === 'Expert Externo') {
-                    window.location.href = `payment-form.html?nome=${encodeURIComponent(nomeInput.value.trim())}&tipo=${encodeURIComponent(tipoSelect.value)}`;
-                }
-            });
-
-            participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
-                const nome = nomeInput.value.trim();
-                if (nome) {
-                    removerParticipante(nome);
-                    participanteDiv.remove();
-                }
-            });
-
-            // Verificar se há pagamento salvo para este participante
-            if (payments[participante.nome]) {
-                abrirFormButton.disabled = false;
+        participantesSelects.forEach(select => {
+            const choicesInstance = select;
+            if (choicesInstance) {
+                choicesInstance.removeActiveItemsByValue(nome);
             }
         });
+
+        atualizarParticipantesDisponiveis();
+        localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
     }
 
-    if (eventDetails) {
-        document.getElementById('nomeEvento').value = eventDetails.nomeEvento;
-        document.getElementById('dataEvento').value = eventDetails.dataEvento;
-        document.getElementById('localEvento').value = eventDetails.localEvento;
-        document.getElementById('nomeSolicitante').value = eventDetails.nomeSolicitante;
-        document.getElementById('unidade').value = eventDetails.unidade;
+    function criarParticipanteDiv(nome = '', tipo = 'expert') {
+        const participanteDiv = document.createElement('div');
+        participanteDiv.classList.add('participante');
+    
+        participanteDiv.innerHTML = `
+            <label for="nomeParticipante">Nome:</label>
+            <input type="text" name="nomeParticipante" value="${nome}">
+            <label for="tipoParticipante">Tipo:</label>
+            <select name="tipoParticipante">
+                <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
+                <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
+            </select>
+            <button type="button" class="removerParticipante">Remover Participante</button>
+            <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
+        `;
+    
+        const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
+        const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
+        const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
+    
+        // Função para atualizar o estado do botão
+        function verificarCondicoes() {
+            const nome = nomeInput.value.trim();
+            const tipo = tipoSelect.value;
+            abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+        }
+    
+        // Configurar eventos
+        nomeInput.addEventListener('blur', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                adicionarParticipante(nome);
+            }
+            verificarCondicoes();
+        });
+    
+        tipoSelect.addEventListener('change', verificarCondicoes);
+    
+        abrirFormularioBtn.addEventListener('click', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}&expertType=${encodeURIComponent(tipoSelect.value)}`;
+            }
+        });
+    
+        participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                removerParticipante(nome);
+                participanteDiv.remove();
+            }
+        });
+    
+        verificarCondicoes();
+        document.getElementById('listaParticipantes').appendChild(participanteDiv);
     }
+    
 
-    validateForm();
-    atualizarParticipantesDisponiveis();
-}
+    // Carrega os participantes armazenados ao carregar a página
+    const participantesArmazenados = JSON.parse(localStorage.getItem('participantes')) || [];
+    participantesArmazenados.forEach(nome => {
+        criarParticipanteDiv(nome);
+    });
 
+    form.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', validateForm);
+    });
 
+    document.getElementById('adicionarParticipante').addEventListener('click', () => {
+        criarParticipanteDiv();
+    });
 
-    downloadButton.addEventListener('click', () => {
+    document.getElementById('adicionarAtividade').addEventListener('click', () => {
+        const atividadeDiv = document.createElement('div');
+        atividadeDiv.classList.add('atividade');
+        atividadeDiv.innerHTML = `
+            <label for="descricaoAtividade">Descrição da Atividade:</label>
+            <input type="text" name="descricaoAtividade">
+            <label for="salaLink">Sala ou Link:</label>
+            <input type="text" name="salaLink">
+            <label for="dataHoraAtividade">Data e Horário:</label>
+            <input type="datetime-local" name="dataHoraAtividade">
+            <label for="teveRefeicao">Teve Refeição?</label>
+            <input type="checkbox" name="teveRefeicao">
+            <label for="palestrantes">Palestrantes (Computam Horas):</label>
+            <select name="palestrantes" multiple></select>
+            <label for="outrosParticipantes">Outros Participantes:</label>
+            <select name="outrosParticipantes" multiple></select>
+            <button type="button" class="removerAtividade">Remover Atividade</button>
+        `;
+
+        document.getElementById('listaAtividades').appendChild(atividadeDiv);
+
+        const palestrantesSelect = atividadeDiv.querySelector('select[name="palestrantes"]');
+        const outrosParticipantesSelect = atividadeDiv.querySelector('select[name="outrosParticipantes"]');
+
+        const choicesPalestrantes = new Choices(palestrantesSelect, { removeItemButton: true, allowHTML: true });
+        const choicesOutrosParticipantes = new Choices(outrosParticipantesSelect, { removeItemButton: true, allowHTML: true });
+
+        participantesSelects.push(choicesPalestrantes, choicesOutrosParticipantes);
+
+        setTimeout(() => {
+            atualizarParticipantesDisponiveis();
+
+            palestrantesSelect.addEventListener('change', () => {
+                atualizarParticipantesNoFormulario(choicesPalestrantes);
+            });
+
+            outrosParticipantesSelect.addEventListener('change', () => {
+                atualizarParticipantesNoFormulario(choicesOutrosParticipantes);
+            });
+        }, 0);
+
+        atividadeDiv.querySelector('.removerAtividade').addEventListener('click', () => {
+            participantesSelects.splice(participantesSelects.indexOf(choicesPalestrantes), 1);
+            participantesSelects.splice(participantesSelects.indexOf(choicesOutrosParticipantes), 1);
+            atividadeDiv.remove();
+            atualizarParticipantesDisponiveis();
+        });
+    });
+
+    downloadButton.addEventListener('click', async () => {
         const nomeEvento = document.getElementById('nomeEvento').value.trim();
         const dataEvento = document.getElementById('dataEvento').value.trim();
 
         const participantes = [];
         document.querySelectorAll('.participante').forEach(participanteDiv => {
             const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
-            const tipo = participanteDiv.querySelector('select[name="tipoParticipante"]').value.trim();
+            const tipo = participanteDiv.querySelector('select[name="tipoParticipante"]').value;
             participantes.push({ nome, tipo });
         });
 
@@ -203,39 +216,113 @@ function restoreFormData() {
             const teveRefeicao = atividadeDiv.querySelector('input[name="teveRefeicao"]').checked;
             const palestrantes = Array.from(atividadeDiv.querySelector('select[name="palestrantes"]').selectedOptions).map(option => option.value);
             const outrosParticipantes = Array.from(atividadeDiv.querySelector('select[name="outrosParticipantes"]').selectedOptions).map(option => option.value);
+
             atividades.push({ descricao, salaLink, dataHora, teveRefeicao, palestrantes, outrosParticipantes });
         });
 
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        doc.text(`Evento: ${nomeEvento}`, 10, 10);
-        doc.text(`Data: ${dataEvento}`, 10, 20);
-
-        let currentY = 30;
-        doc.text("Participantes:", 10, currentY);
-        currentY += 10;
-        participantes.forEach(participante => {
-            doc.text(`- ${participante.nome} (${participante.tipo})`, 10, currentY);
-            currentY += 10;
-        });
-
-        currentY += 10;
-        doc.text("Agenda:", 10, currentY);
-        currentY += 10;
-        atividades.forEach(atividade => {
-            doc.text(`- ${atividade.descricao}`, 10, currentY);
-            doc.text(`  - Sala/Link: ${atividade.salaLink}`, 10, currentY + 5);
-            doc.text(`  - Data/Hora: ${atividade.dataHora}`, 10, currentY + 10);
-            doc.text(`  - Refeição: ${atividade.teveRefeicao ? 'Sim' : 'Não'}`, 10, currentY + 15);
-            doc.text(`   - Palestrantes: ${atividade.palestrantes.join(', ')}`, 10, currentY + 20);
-            doc.text(`   - Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, 10, currentY + 25);
-            currentY += 35;
-        });
-
-        doc.save('dados_combinados.pdf');
+        await gerarPDF({ nomeEvento, dataEvento, participantes, atividades });
     });
 
-    validateForm();
-    restoreFormData();
-    atualizarParticipantesDisponiveis();
+    async function gerarPDF() {
+        const { PDFDocument, rgb } = PDFLib;
+    
+        // Coletar dados do formulário
+        const nomeEvento = document.getElementById('nomeEvento').value || '';
+        const localEvento = document.getElementById('localEvento').value || '';
+        const dataEvento = document.getElementById('dataEvento').value || '';
+        const nomeSolicitante = document.getElementById('nomeSolicitante').value || '';
+        const unidade = document.getElementById('unidade').value || '';
+        const racionalEvento = document.getElementById('racionalEvento').value || '';
+        const comentariosObservacoes = document.getElementById('comentariosObservacoes').value || '';
+    
+        // Verifique se há participantes
+        const participantes = Array.from(document.querySelectorAll('#listaParticipantes .participante')).map(participante => {
+            const nomeInput = participante.querySelector('input[name="nomeParticipante"]');
+            const tipoSelect = participante.querySelector('select[name="tipoParticipante"]');
+            return {
+                nome: nomeInput ? nomeInput.value.trim() : '',
+                tipo: tipoSelect ? tipoSelect.value : ''
+            };
+        });
+    
+        // Verifique se há atividades
+        const atividades = Array.from(document.querySelectorAll('#listaAtividades .atividade')).map(atividade => {
+            const descricaoInput = atividade.querySelector('input[name="descricaoAtividade"]');
+            const salaLinkInput = atividade.querySelector('input[name="salaLink"]');
+            const dataHoraInput = atividade.querySelector('input[name="dataHoraAtividade"]');
+            const teveRefeicaoCheckbox = atividade.querySelector('input[name="teveRefeicao"]');
+            const palestrantesSelect = atividade.querySelector('select[name="palestrantes"]');
+            const outrosParticipantesSelect = atividade.querySelector('select[name="outrosParticipantes"]');
+            
+            return {
+                descricao: descricaoInput ? descricaoInput.value.trim() : '',
+                salaLink: salaLinkInput ? salaLinkInput.value.trim() : '',
+                dataHora: dataHoraInput ? dataHoraInput.value.trim() : '',
+                teveRefeicao: teveRefeicaoCheckbox ? teveRefeicaoCheckbox.checked : false,
+                palestrantes: palestrantesSelect ? Array.from(palestrantesSelect.selectedOptions).map(option => option.value) : [],
+                outrosParticipantes: outrosParticipantesSelect ? Array.from(outrosParticipantesSelect.selectedOptions).map(option => option.value) : []
+            };
+        });
+    
+        const pdfDoc = await PDFDocument.create();
+        const page = pdfDoc.addPage([600, 800]);
+        const { height } = page.getSize();
+    
+        let yOffset = height - 50;
+    
+        // Dados do Evento
+        page.drawText(`Nome do Evento: ${nomeEvento}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Local do Evento: ${localEvento}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Data do Evento: ${dataEvento}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Nome do Solicitante: ${nomeSolicitante}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Unidade: ${unidade}`, { x: 50, y: yOffset, size: 12 });
+        yOffset -= 20;
+        page.drawText(`Racional do Evento: ${racionalEvento}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
+        yOffset -= 40;
+        page.drawText(`Comentários ou Observações: ${comentariosObservacoes}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
+        yOffset -= 60;
+    
+        // Participantes
+        page.drawText('Participantes:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
+        yOffset -= 20;
+        participantes.forEach((participante, index) => {
+            page.drawText(`Nome: ${participante.nome} - Tipo: ${participante.tipo}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+        });
+    
+        // Agenda
+        page.drawText('Agenda:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
+        yOffset -= 20;
+        atividades.forEach((atividade, index) => {
+            page.drawText(`Descrição: ${atividade.descricao}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Sala/Link: ${atividade.salaLink}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Data e Hora: ${atividade.dataHora}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Teve Refeição: ${atividade.teveRefeicao ? 'Sim' : 'Não'}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Palestrantes: ${atividade.palestrantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 20;
+            page.drawText(`Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
+            yOffset -= 40;
+        });
+    
+        const pdfBytes = await pdfDoc.save();
+        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+    
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'evento.pdf';
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+    
+    
+    
 });

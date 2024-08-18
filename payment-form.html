@@ -5,10 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário de Pagamento do Expert</title>
     <link rel="stylesheet" href="CSS/style.css">
-    <script defer src="JS/payment.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+        h3 {
+            border-bottom: 2px solid #007BFF;
+            padding-bottom: 10px;
+            color: #007BFF;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <form id="paymentForm">
+    <form id="paymentForm" onsubmit="return handleSubmit()">
         <section id="serviceInfo">
             <h3>Informações do Serviço</h3>
             <label for="requestorName">Nome do Solicitante:</label>
@@ -46,7 +94,15 @@
                 <option value="advisory board">Advisory Board</option>
                 <option value="clinical research activities">Clinical Research Activities</option>
                 <option value="consulting service">Consulting Service</option>
-                <!-- Adicione mais opções conforme necessário -->
+                <option value="investigator meeting">Investigator Meeting</option>
+                <option value="Sanofi preceptorship">Sanofi Preceptorship</option>
+                <option value="Sanofi stand-alone meeting">Sanofi Stand-alone Meeting</option>
+                <option value="scientific educational program/meeting">Scientific Educational Program/Meeting</option>
+                <option value="speaker program/meeting">Speaker Program/Meeting</option>
+                <option value="speaker training">Speaker Training</option>
+                <option value="study committee">Study Committee</option>
+                <option value="symposium within the framework of a congress">Symposium within the Framework of a Congress</option>
+                <option value="other services">Other Services</option>
             </select>
 
             <label for="role">Papel:</label>
@@ -61,14 +117,22 @@
             <label for="expertLevel">Nível do Expert:</label>
             <select id="expertLevel" name="expertLevel">
                 <option value="tier 1 specialist">Tier 1 Specialist</option>
-                <!-- Adicione mais níveis conforme necessário -->
+                <option value="tier 2 specialist">Tier 2 Specialist</option>
+                <option value="tier 3 specialist">Tier 3 Specialist</option>
+                <option value="tier 4 specialist">Tier 4 Specialist</option>
+                <option value="tier 5 specialist">Tier 5 Specialist</option>
+                <option value="tier 1 generalist">Tier 1 Generalist</option>
+                <option value="tier 2 generalist">Tier 2 Generalist</option>
+                <option value="tier 3 generalist">Tier 3 Generalist</option>
+                <option value="tier 4 generalist">Tier 4 Generalist</option>
+                <option value="tier 5 generalist">Tier 5 Generalist</option>
             </select>
 
             <label for="hourlyRateBRL">Taxa por Hora (BRL):</label>
-            <input type="number" id="hourlyRateBRL" name="hourlyRateBRL">
+            <input type="number" id="hourlyRateBRL" name="hourlyRateBRL" step="0.01" oninput="updateHourlyRateUSD()">
 
             <label for="hourlyRateUSD">Taxa por Hora (USD):</label>
-            <input type="number" id="hourlyRateUSD" name="hourlyRateUSD" readonly>
+            <input type="number" id="hourlyRateUSD" name="hourlyRateUSD" step="0.01" readonly>
 
             <label for="serviceDuration">Duração do Serviço (Horas):</label>
             <input type="number" id="serviceDuration" name="serviceDuration" step="0.5">
@@ -76,14 +140,125 @@
             <label for="preparationTime">Tempo de Preparação (Horas):</label>
             <input type="number" id="preparationTime" name="preparationTime" step="0.5">
 
-            <!-- Adicione mais campos conforme necessário -->
+            <label for="presentationType">Tipo de Apresentação:</label>
+            <select id="presentationType" name="presentationType">
+                <option value="new presentation">Nova Apresentação</option>
+                <option value="minor updates">Atualizações Menores</option>
+                <option value="no update">Sem Atualização</option>
+                <option value="not applicable">Não Aplicável</option>
+            </select>
 
-            <label for="additionalInfo">Informações Adicionais e/ou Justificativas:</label>
+            <label for="confCallCount">Número de Conf Calls Preparatórias:</label>
+            <input type="number" id="confCallCount" name="confCallCount">
+
+            <label for="individualPrepTime">Tempo de Preparação Individual (Sim ou Não):</label>
+            <select id="individualPrepTime" name="individualPrepTime">
+                <option value="yes">Sim</option>
+                <option value="no">Não</option>
+            </select>
+
+            <label for="preReadingRequired">Pré-leitura Requerida pela Sanofi:</label>
+            <select id="preReadingRequired" name="preReadingRequired">
+                <option value="yes">Sim</option>
+                <option value="no">Não</option>
+            </select>
+
+            <label for="onSiteSlideReview">Revisão de Slides no Local:</label>
+            <select id="onSiteSlideReview" name="onSiteSlideReview">
+                <option value="yes">Sim</option>
+                <option value="no">Não</option>
+            </select>
+
+            <label for="speakerNotesRequired">Notas do Palestrante Requeridas pela Sanofi:</label>
+            <select id="speakerNotesRequired" name="speakerNotesRequired">
+                <option value="yes">Sim</option>
+                <option value="no">Não</option>
+            </select>
+
+            <label for="travelTime">Tempo de Viagem:</label>
+            <select id="travelTime" name="travelTime">
+                <option value="virtual meeting">Reunião Virtual</option>
+                <option value="0 - 80 km">0 - 80 km</option>
+                <option value="81 - 160 km">81 - 160 km</option>
+                <option value="161 - 400 km">161 - 400 km</option>
+                <option value="401 - 1200 km">401 - 1200 km</option>
+                <option value="1201 - 8000 km">1201 - 8000 km</option>
+                <option value="8001 - 16000 km">8001 - 16000 km</option>
+                <option value="16001 - 32000 km">16001 - 32000 km</option>
+                <option value="above 32000 km">Acima de 32000 km</option>
+            </select>
+
+            <label for="additionalInfo">Informações e/ou Justificativas Adicionais:</label>
             <textarea id="additionalInfo" name="additionalInfo"></textarea>
         </section>
 
         <button type="submit">Salvar</button>
-        <a href="formulario_evento.html" class="btn">Voltar à Agenda</a>
+        <button type="button" id="exportPDFButton">Exportar para PDF</button>
     </form>
+
+    <!-- Carregue jsPDF antes do seu script -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+    <script>
+        // Função para atualizar a taxa por hora em USD
+        function updateHourlyRateUSD() {
+            const brlRate = parseFloat(document.getElementById('hourlyRateBRL').value);
+            if (isNaN(brlRate)) return;
+
+            fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
+                .then(response => response.json())
+                .then(data => {
+                    const usdRate = data.conversion_rates.USD;
+                    document.getElementById('hourlyRateUSD').value = (brlRate * usdRate).toFixed(2);
+                })
+                .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
+        }
+
+        // Função para lidar com o envio do formulário
+        function handleSubmit() {
+            window.location.href = 'formulario_evento.html';
+            return false;
+        }
+
+        // Adiciona o listener ao botão de exportação para PDF
+        document.getElementById('exportPDFButton').addEventListener('click', async () => {
+            try {
+                const { PDFDocument, rgb } = PDFLib;
+                const doc = await PDFDocument.create();
+                const page = doc.addPage([600, 400]);
+                const { width, height } = page.getSize();
+                const fontSize = 12;
+
+                page.drawText('Formulário de Pagamento do Expert', {
+                    x: 50,
+                    y: height - 50,
+                    size: fontSize,
+                    color: rgb(0, 0, 1)
+                });
+
+                const form = document.getElementById('paymentForm');
+                const formData = new FormData(form);
+                let y = height - 80;
+
+                formData.forEach((value, key) => {
+                    page.drawText(`${key}: ${value}`, {
+                        x: 50,
+                        y: y,
+                        size: fontSize,
+                        color: rgb(0, 0, 0)
+                    });
+                    y -= 15;
+                });
+
+                const pdfBytes = await doc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'formulario-expert.pdf';
+                link.click();
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+            }
+        });
+    </script>
 </body>
 </html>
