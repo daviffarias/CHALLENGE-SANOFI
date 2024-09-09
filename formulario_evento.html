@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,15 +9,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
     <script defer src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script defer src="JS/script.js"></script>
+
     <title>Cadastro de Evento</title>
     <link rel="stylesheet" href="CSS/style.css">
+
+    <!-- importando coisas pro autocomplete -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script defer src="./JS/autocomplete.js"></script>
+    <link rel="stylesheet" href="CSS/autocomplete_style.css">
 </head>
+
 <body>
-    <form id="eventForm">
+    <form id="eventForm" method="POST">
         <section id="dadosEvento">
             <a href="index.html" class="btn">Voltar ao inicio</a>
             <h3>Dados do Evento</h3>
-    
+
             <label for="tipoEvento">Tipo de Evento:</label>
             <select id="tipoEvento" name="tipoEvento">
                 <option value="advisory board">Advisory Board</option>
@@ -26,42 +34,51 @@
                 <option value="consulting">Consulting</option>
                 <option value="other">Other</option>
             </select>
-    
-            <label for="nomeEvento">Nome do Evento:</label>
-            <input type="text" id="nomeEvento" name="nomeEvento">
-    
-            <label for="localEvento">Local do Evento:</label>
-            <input type="text" id="localEvento" name="localEvento">
-    
-            <label for="dataEvento">Data:</label>
-            <input type="date" id="dataEvento" name="dataEvento">
-    
-            <label for="nomeSolicitante">Nome do Solicitante:</label>
-            <input type="text" id="nomeSolicitante" name="nomeSolicitante">
-    
-            <label for="unidade">Unidade:</label>
-            <input type="text" id="unidade" name="unidade">
-    
-            <label for="racionalEvento">Racional do Evento:</label>
-            <textarea id="racionalEvento" name="racionalEvento"></textarea>
-    
+            <br><br>
+
+            <!-- <label for="nomeEvento">Nome do Evento:</label> -->
+            <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Nome do evento">
+            <br><br>
+
+            <!-- <label for="localEvento">Local do Evento:</label> -->
+            <input type="text" id="localEvento" name="localEvento" placeholder="Local do evento">
+            <br><br>
+
+            <!-- <label for="dataEvento">Data:</label> -->
+            <input type="date" id="dataEvento" name="dataEvento" placeholder="Data">
+            <br><br>
+
+            <!-- <label for="nomeSolicitante">Nome do Solicitante:</label> -->
+            <input type="text" id="nomeSolicitante" name="nomeSolicitante" placeholder="Nome do solicitante">
+            <br><br>
+
+            <!-- <label for="unidade">Unidade:</label> -->
+            <input type="text" id="unidade" name="unidade" placeholder="Unidade">
+            <br><br>
+
+            <!-- <label for="racionalEvento">Racional do Evento:</label> -->
+            <textarea id="racionalEvento" name="racionalEvento" placeholder="Racional do evento"></textarea>
+            <br><br>
+
             <label for="comentariosObservacoes">Comentários ou Observações:</label>
             <textarea id="comentariosObservacoes" name="comentariosObservacoes"></textarea>
+            <br><br>
         </section>
-    
+
         <section id="participantes">
             <h3>Participantes</h3>
             <div id="listaParticipantes"></div>
             <button type="button" id="adicionarParticipante">Adicionar Participante</button>
         </section>
-    
+
         <section id="agenda">
             <h3>Agenda</h3>
             <div id="listaAtividades"></div>
             <button type="button" id="adicionarAtividade">Adicionar Atividade</button>
         </section>
-    
+
         <button type="button" id="downloadPDF" disabled>Baixar Dados Combinados (PDF)</button>
     </form>
 </body>
+
 </html>
