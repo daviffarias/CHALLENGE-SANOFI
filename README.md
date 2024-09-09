@@ -24,7 +24,6 @@ Para adicionar o autocomplete em algum input, siga os passos:
 
 [ ] - Modelar o banco de dados para ter colunas para cada campo que terá autocomplete  
 [ ] - Atualizar os campos que estão faltantes do FMV
-[ ] - Refletir campos agenda no FMV
 [ ] - Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
 **Ex:** valorTaxaKm = 5  
 [ ] - Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial
