@@ -1,0 +1,49 @@
+#suggestions,
+#emailSuggestions {
+    border: 1px solid #ddd;
+    max-height: 150px;
+    overflow: auto;
+    /* Permite a rolagem */
+    position: absolute;
+    background-color: white;
+    z-index: 1000;
+    /* Garante que o dropdown fique acima de outros elementos */
+}
+
+/* Oculta a barra de rolagem em WebKit (Chrome, Safari) */
+#suggestions::-webkit-scrollbar,
+#emailSuggestions::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Oculta a barra de rolagem em Firefox */
+#suggestions,
+#emailSuggestions {
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+/* Oculta a barra de rolagem em Edge e Internet Explorer */
+#suggestions,
+#emailSuggestions {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+#suggestions div,
+#emailSuggestions div {
+    padding: 8px;
+    cursor: pointer;
+    background-color: white;
+}
+
+#suggestions div:hover,
+#emailSuggestions div:hover {
+    background-color: #f0f0f0;
+}
+
+#suggestions .active,
+#emailSuggestions .active {
+    background-color: #d0d0d0;
+}
