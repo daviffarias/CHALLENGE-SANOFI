@@ -1,5 +1,7 @@
 # FormEase
 
+    Formulário com preenchimento automático de campos repetidos e autocomplete.
+
 ## Status
 
 - O autocomplete já está funcionando para o input "Nome do evento". 
