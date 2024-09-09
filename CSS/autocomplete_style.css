@@ -1,4 +1,4 @@
-#suggestions,
+#nomeEventoSuggestions,
 #emailSuggestions {
     border: 1px solid #ddd;
     max-height: 150px;
@@ -11,39 +11,39 @@
 }
 
 /* Oculta a barra de rolagem em WebKit (Chrome, Safari) */
-#suggestions::-webkit-scrollbar,
+#nomeEventoSuggestions::-webkit-scrollbar,
 #emailSuggestions::-webkit-scrollbar {
     width: 0;
     height: 0;
 }
 
 /* Oculta a barra de rolagem em Firefox */
-#suggestions,
+#nomeEventoSuggestions,
 #emailSuggestions {
     scrollbar-width: none;
     /* Firefox */
 }
 
 /* Oculta a barra de rolagem em Edge e Internet Explorer */
-#suggestions,
+#nomeEventoSuggestions,
 #emailSuggestions {
     -ms-overflow-style: none;
     /* IE and Edge */
 }
 
-#suggestions div,
+#nomeEventoSuggestions div,
 #emailSuggestions div {
     padding: 8px;
     cursor: pointer;
     background-color: white;
 }
 
-#suggestions div:hover,
+#nomeEventoSuggestions div:hover,
 #emailSuggestions div:hover {
     background-color: #f0f0f0;
 }
 
-#suggestions .active,
+#nomeEventoSuggestions .active,
 #emailSuggestions .active {
     background-color: #d0d0d0;
 }

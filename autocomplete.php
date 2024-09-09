@@ -4,7 +4,7 @@ $conn = new PDO('sqlite:database.db');
 if (isset($_POST['action'])) {
     $query = $_POST['query'];
     
-    if ($_POST['action'] == 'autocomplete_name') {
+    if ($_POST['action'] == 'autocomplete_nomeEvento') {
         $stmt = $conn->prepare("SELECT DISTINCT nome FROM sugestoes WHERE nome LIKE :query");
         $stmt->bindValue(':query', $query . '%');
         $stmt->execute();

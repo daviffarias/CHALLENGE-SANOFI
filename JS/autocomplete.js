@@ -76,11 +76,10 @@ $(document).ready(function () {
     }
 
     // Configura o autocomplete para cada campo
-    setupAutocomplete('dataInput', 'suggestions', 'autocomplete_name');
-    setupAutocomplete('emailInput', 'emailSuggestions', 'autocomplete_email');
+    setupAutocomplete('nomeEvento', 'nomeEventoSuggestions', 'autocomplete_nomeEvento'); // inputId, suggestionsId, action
 
     // Evento para o envio do formulário
-    $('#myForm').on('submit', function (e) {
+    $('#eventForm').on('submit', function (e) {
         e.preventDefault(); // Evita o envio normal do formulário
 
         var formData = $(this).serialize(); // Pega todos os dados do formulário
