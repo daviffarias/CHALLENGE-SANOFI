@@ -29,12 +29,12 @@ if (isset($_POST['action'])) {
         echo json_encode($suggestions);
     
     } elseif ($_POST['action'] == 'submit') {
-        $nome = $_POST['dataInput'];
-        $email = $_POST['emailInput'];
+        $nome = $_POST['nomeEvento'];
+        // $email = $_POST['emailInput'];
 
-        $stmt = $conn->prepare("INSERT INTO sugestoes (nome, email) VALUES (:nome, :email)");
+        $stmt = $conn->prepare("INSERT INTO sugestoes (nome) VALUES (:nome)");
         $stmt->bindValue(':nome', $nome);
-        $stmt->bindValue(':email', $email);
+        // $stmt->bindValue(':email', $email);
         $stmt->execute();
 
         echo "Formulário enviado e salvo com sucesso!";

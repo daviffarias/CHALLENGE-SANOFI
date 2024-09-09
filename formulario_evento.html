@@ -36,33 +36,35 @@
             </select>
             <br><br>
 
-            <!-- <label for="nomeEvento">Nome do Evento:</label> -->
-            <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Nome do evento">
+            <label for="nomeEvento">Nome do Evento:</label>
+            <input type="text" id="nomeEvento" name="nomeEvento" placeholder="Nome do evento" autocomplete="off">
             <div id="nomeEventoSuggestions"></div>
             <br><br>
 
-            <!-- <label for="localEvento">Local do Evento:</label> -->
-            <input type="text" id="localEvento" name="localEvento" placeholder="Local do evento">
+            <label for="localEvento">Local do Evento:</label>
+            <input type="text" id="localEvento" name="localEvento" placeholder="Local do evento" autocomplete="off">
             <br><br>
 
-            <!-- <label for="dataEvento">Data:</label> -->
-            <input type="date" id="dataEvento" name="dataEvento" placeholder="Data">
+            <label for="dataEvento">Data:</label>
+            <input type="date" id="dataEvento" name="dataEvento" placeholder="Data" autocomplete="off">
             <br><br>
 
-            <!-- <label for="nomeSolicitante">Nome do Solicitante:</label> -->
-            <input type="text" id="nomeSolicitante" name="nomeSolicitante" placeholder="Nome do solicitante">
+            <label for="nomeSolicitante">Nome do Solicitante:</label>
+            <input type="text" id="nomeSolicitante" name="nomeSolicitante" placeholder="Nome do solicitante"
+                autocomplete="off">
             <br><br>
 
-            <!-- <label for="unidade">Unidade:</label> -->
-            <input type="text" id="unidade" name="unidade" placeholder="Unidade">
+            <label for="unidade">Unidade:</label>
+            <input type="text" id="unidade" name="unidade" placeholder="Unidade" autocomplete="off">
             <br><br>
 
-            <!-- <label for="racionalEvento">Racional do Evento:</label> -->
-            <textarea id="racionalEvento" name="racionalEvento" placeholder="Racional do evento"></textarea>
+            <label for="racionalEvento">Racional do Evento:</label>
+            <textarea id="racionalEvento" name="racionalEvento" placeholder="Racional do evento"
+                autocomplete="off"></textarea>
             <br><br>
 
             <label for="comentariosObservacoes">Comentários ou Observações:</label>
-            <textarea id="comentariosObservacoes" name="comentariosObservacoes"></textarea>
+            <textarea id="comentariosObservacoes" name="comentariosObservacoes" autocomplete="off"></textarea>
             <br><br>
         </section>
 
@@ -78,7 +80,7 @@
             <button type="button" id="adicionarAtividade">Adicionar Atividade</button>
         </section>
 
-        <button type="button" id="downloadPDF" disabled>Baixar Dados Combinados (PDF)</button>
+        <button type="submit" id="downloadPDF" disabled>Baixar Dados Combinados (PDF)</button>
     </form>
 </body>
 
