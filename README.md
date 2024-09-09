@@ -1,4 +1,23 @@
 # FormEase
 
+## Status
 
-[ ] - Fazer algum botão dar submit no formulário pra salvar os dados no banco de dados
+- O autocomplete já está funcionando para o input "Nome do evento". 
+- 
+
+## Adicionar autocomplete
+
+Para adicionar o autocomplete em algum input, siga os passos:
+
+1. Crie o input e dê um id e um nome;
+2. Crie uma div embaixo do input com o id: idDoInput+Suggestions Ex: nomeEventoSuggestions;
+3. Utilize a função setupAutocomplete no javascript passando os seguintes parâmetros:
+    1. id do input;
+    2. id da div;
+    3. nome arbitrário do evento, que será utilizado no script php.
+ 4. Atualize o autocomplete_style adicionando o id da div em todos os blocos;
+ 5. Copie o if ($_POST['action']) do php, sendo que a action será o nome arbitrário escolhido no passo 3.3;
+
+## TODO:
+
+[ ] - Modelar o banco de dados para ter colunas para cada campo que terá autocomplete
