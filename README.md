@@ -23,7 +23,8 @@ Para adicionar o autocomplete em algum input, siga os passos:
 ## TODO:
 
 [ ] - Modelar o banco de dados para ter colunas para cada campo que terá autocomplete  
-[ ] - Atualizar os campos que estão faltantes do FMV
+[ ] - Atualizar os campos que estão faltantes do FMV  
 [ ] - Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
 **Ex:** valorTaxaKm = 5  
-[ ] - Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial
+[ ] - Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial  
+[ ] - Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador  
