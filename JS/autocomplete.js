@@ -11,7 +11,7 @@ $(document).ready(function () {
             suggestionsElement.css({
                 top: offset.top + height,
                 left: offset.left,
-                width: inputElement.outerWidth() // Ajusta a largura da caixa de sugestões
+                width: inputElement.outerWidth()
             });
         }
 
@@ -23,24 +23,23 @@ $(document).ready(function () {
                     method: 'POST',
                     data: { action: action, query: query },
                     success: function (data) {
-                        suggestionsElement.empty(); // Limpa as sugestões anteriores
+                        suggestionsElement.empty();
                         var suggestions = JSON.parse(data);
-                        suggestions.forEach(function (item) {
+                        // Exibir no máximo 5 sugestões
+                        suggestions.slice(0, 5).forEach(function (item) {
                             suggestionsElement.append('<div>' + item + '</div>');
                         });
 
-                        // Posicionar a caixa de sugestões
                         positionSuggestions();
 
-                        // Ao clicar em uma sugestão, preenche o input
                         suggestionsElement.find('div').on('click', function () {
                             inputElement.val($(this).text());
-                            suggestionsElement.empty(); // Limpa as sugestões após clicar
+                            suggestionsElement.empty();
                         });
                     }
                 });
             } else {
-                suggestionsElement.empty(); // Limpa se não houver texto
+                suggestionsElement.empty();
             }
         });
 
@@ -54,10 +53,8 @@ $(document).ready(function () {
                 addActive(suggestions);
             } else if (e.key === 'Enter') {
                 e.preventDefault();
-                if (currentFocus > -1) {
-                    if (suggestions.length > 0) {
-                        suggestions.eq(currentFocus).click();
-                    }
+                if (currentFocus > -1 && suggestions.length > 0) {
+                    suggestions.eq(currentFocus).click();
                 }
             }
         });
@@ -73,16 +70,20 @@ $(document).ready(function () {
         function removeActive(suggestions) {
             suggestions.removeClass('active');
         }
+
+        $(document).on('click', function (e) {
+            if (!inputElement.is(e.target) && !suggestionsElement.is(e.target) && suggestionsElement.has(e.target).length === 0) {
+                suggestionsElement.empty();
+            }
+        });
     }
 
-    // Configura o autocomplete para cada campo
-    setupAutocomplete('nomeEvento', 'nomeEventoSuggestions', 'autocomplete_nomeEvento'); // inputId, suggestionsId, action
+    setupAutocomplete('nomeEvento', 'nomeEventoSuggestions', 'autocomplete_nomeEvento');
 
-    // Evento para o envio do formulário
     $('#eventForm').on('submit', function (e) {
-        e.preventDefault(); // Evita o envio normal do formulário
+        e.preventDefault();
 
-        var formData = $(this).serialize(); // Pega todos os dados do formulário
+        var formData = $(this).serialize();
 
         $.ajax({
             url: 'autocomplete.php',
@@ -90,7 +91,6 @@ $(document).ready(function () {
             data: formData + '&action=submit',
             success: function (response) {
                 alert('Formulário enviado com sucesso!');
-                // Limpar todos os inputs
                 $('#myForm')[0].reset();
                 $('#suggestions').empty();
                 $('#emailSuggestions').empty();
