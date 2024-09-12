@@ -91,7 +91,7 @@ $(document).ready(function () {
             data: formData + '&action=submit',
             success: function (response) {
                 alert('Formulário enviado com sucesso!');
-                $('#myForm')[0].reset();
+                $('#eventForm')[0].reset();
                 $('#suggestions').empty();
                 $('#emailSuggestions').empty();
             }
