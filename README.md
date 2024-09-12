@@ -27,4 +27,4 @@ Para adicionar o autocomplete em algum input, siga os passos:
 [ ] - Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
 **Ex:** valorTaxaKm = 5  
 [ ] - Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial  
-[ ] - Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador  
+[x] - Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador  
