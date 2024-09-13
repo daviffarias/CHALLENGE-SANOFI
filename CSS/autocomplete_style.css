@@ -1,49 +1,66 @@
 #nomeEventoSuggestions,
-#emailSuggestions {
+#localEventoSuggestions,
+#dataEventoSuggestions,
+#nomeSolicitanteSuggestions,
+#unidadeSuggestions {
     border: 1px solid #ddd;
     max-height: 150px;
-    overflow: auto;
-    /* Permite a rolagem */
+    overflow: auto; /* Permite a rolagem */
     position: absolute;
     background-color: white;
-    z-index: 1000;
-    /* Garante que o dropdown fique acima de outros elementos */
+    z-index: 1000; /* Garante que o dropdown fique acima de outros elementos */
 }
 
 /* Oculta a barra de rolagem em WebKit (Chrome, Safari) */
 #nomeEventoSuggestions::-webkit-scrollbar,
-#emailSuggestions::-webkit-scrollbar {
+#localEventoSuggestions::-webkit-scrollbar,
+#dataEventoSuggestions::-webkit-scrollbar,
+#nomeSolicitanteSuggestions::-webkit-scrollbar,
+#unidadeSuggestions::-webkit-scrollbar {
     width: 0;
     height: 0;
 }
 
 /* Oculta a barra de rolagem em Firefox */
 #nomeEventoSuggestions,
-#emailSuggestions {
-    scrollbar-width: none;
-    /* Firefox */
+#localEventoSuggestions,
+#dataEventoSuggestions,
+#nomeSolicitanteSuggestions,
+#unidadeSuggestions {
+    scrollbar-width: none; /* Firefox */
 }
 
 /* Oculta a barra de rolagem em Edge e Internet Explorer */
 #nomeEventoSuggestions,
-#emailSuggestions {
-    -ms-overflow-style: none;
-    /* IE and Edge */
+#localEventoSuggestions,
+#dataEventoSuggestions,
+#nomeSolicitanteSuggestions,
+#unidadeSuggestions {
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
 #nomeEventoSuggestions div,
-#emailSuggestions div {
+#localEventoSuggestions div,
+#dataEventoSuggestions div,
+#nomeSolicitanteSuggestions div,
+#unidadeSuggestions div {
     padding: 8px;
     cursor: pointer;
     background-color: white;
 }
 
 #nomeEventoSuggestions div:hover,
-#emailSuggestions div:hover {
+#localEventoSuggestions div:hover,
+#dataEventoSuggestions div:hover,
+#nomeSolicitanteSuggestions div:hover,
+#unidadeSuggestions div:hover {
     background-color: #f0f0f0;
 }
 
 #nomeEventoSuggestions .active,
-#emailSuggestions .active {
+#localEventoSuggestions .active,
+#dataEventoSuggestions .active,
+#nomeSolicitanteSuggestions .active,
+#unidadeSuggestions .active {
     background-color: #d0d0d0;
 }

@@ -22,10 +22,14 @@ Para adicionar o autocomplete em algum input, siga os passos:
 
 ## TODO:
 
-- [ ] Personalizar o pdf com alguma biblioteca javascript  
+- [ ] Personalizar o PDF com alguma biblioteca javascript  
 - [ ] Modelar o banco de dados para ter colunas para cada campo que terá autocomplete  
 - [ ] Atualizar os campos que estão faltantes do FMV  
 - [ ] Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
 **Ex:** valorTaxaKm = 5  
 - [ ] Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial  
 - [x] Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador  
+
+## Bugs:
+
+- Quando eu preencho todo o formulário de pagamento de algum participante, o que eu já tinha preenchido no formulário do evento some  

@@ -79,6 +79,10 @@ $(document).ready(function () {
     }
 
     setupAutocomplete('nomeEvento', 'nomeEventoSuggestions', 'autocomplete_nomeEvento');
+    setupAutocomplete('localEvento', 'localEventoSuggestions', 'autocomplete_localEvento');
+    setupAutocomplete('dataEvento', 'dataEventoSuggestions', 'autocomplete_dataEvento');
+    setupAutocomplete('nomeSolicitante', 'nomeSolicitanteSuggestions', 'autocomplete_nomeSolicitante');
+    setupAutocomplete('unidade', 'unidadeSuggestions', 'autocomplete_unidade');
 
     $('#eventForm').on('submit', function (e) {
         e.preventDefault();
