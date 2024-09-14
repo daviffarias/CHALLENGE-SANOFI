@@ -378,12 +378,6 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
     
 
     function saveData() {
-        const participantes = [];
-        document.querySelectorAll('.participante').forEach(participanteDiv => {
-            const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value;
-            const tipo = participanteDiv.querySelector('select[name="tipoParticipante"]').value;
-            participantes.push({ nome, tipo });
-        });
     
         const atividades = [];
         document.querySelectorAll('.atividade').forEach(atividadeDiv => {
@@ -421,13 +415,6 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             document.getElementById('unidade').value = savedData.unidade;
             document.getElementById('racionalEvento').value = savedData.racionalEvento;
             document.getElementById('comentariosObservacoes').value = savedData.comentariosObservacoes;
-    
-            // Restaurar participantes
-            if (savedData.participantes) {
-                savedData.participantes.forEach(participante => {
-                    adicionarParticipante(participante.nome, participante.tipo);
-                });
-            }
     
             // Restaurar atividades
             if (savedData.atividades) {
