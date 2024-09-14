@@ -32,8 +32,10 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [ ] Tempo de Viagem: Colocar o calculo do pagamento de acordo com as faixas de km de deslocamento  
 - [x] Ajustar espelhamento da Agenda -> FMV
 - [x] Corrigir salvamento (localStorage)
-- [ ] Ajustar regra de participantes de cada atividade. Participante só pode ser Palestrante **OU** Participação requerida, porém **pode** participar de outras atividades na mesma agenda
+- [x] Ajustar regra de participantes de cada atividade. Participante só pode ser Palestrante **OU** Participação requerida, porém **pode** participar de outras atividades na mesma agenda
+- [ ] Otimizar código, remover repetições e padronizar (opcional)
 
 ## Bugs:
 
 - [x] Quando eu preencho todo o formulário de pagamento de algum participante, o que eu já tinha preenchido no formulário do evento some  
+- [x] Atualmente os participantes da agenda só podem participar de uma atividade. Eles podem participar de várias atividades dentro de um evento/agenda

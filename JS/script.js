@@ -202,36 +202,49 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             <select name="outrosParticipantes" multiple></select>
             <button type="button" class="removerAtividade">Remover Atividade</button>
         `;
-        
+    
         const palestrantesSelect = atividadeDiv.querySelector('select[name="palestrantes"]');
         const outrosParticipantesSelect = atividadeDiv.querySelector('select[name="outrosParticipantes"]');
-
+    
         const choicesPalestrantes = new Choices(palestrantesSelect, { removeItemButton: true, allowHTML: true });
         const choicesOutrosParticipantes = new Choices(outrosParticipantesSelect, { removeItemButton: true, allowHTML: true });
-
+    
         participantesSelects.push(choicesPalestrantes, choicesOutrosParticipantes);
-
+    
         setTimeout(() => {
             atualizarParticipantesDisponiveis();
-
+    
             palestrantesSelect.addEventListener('change', () => {
-                atualizarParticipantesNoFormulario(choicesPalestrantes);
+                atualizarParticipantesNoFormulario(choicesPalestrantes, choicesOutrosParticipantes);
             });
-
+    
             outrosParticipantesSelect.addEventListener('change', () => {
-                atualizarParticipantesNoFormulario(choicesOutrosParticipantes);
+                atualizarParticipantesNoFormulario(choicesOutrosParticipantes, choicesPalestrantes);
             });
         }, 0);
-
+    
         atividadeDiv.querySelector('.removerAtividade').addEventListener('click', () => {
             participantesSelects.splice(participantesSelects.indexOf(choicesPalestrantes), 1);
             participantesSelects.splice(participantesSelects.indexOf(choicesOutrosParticipantes), 1);
             atividadeDiv.remove();
             atualizarParticipantesDisponiveis();
         });
-
+    
         document.getElementById('listaAtividades').appendChild(atividadeDiv);
     }
+    
+    function atualizarParticipantesNoFormulario(selectModificado, selectOposto) {
+        const valorSelecionado = selectModificado.getValue(true);
+    
+        // Remover participantes selecionados da lista oposta
+        valorSelecionado.forEach(valor => {
+            selectOposto.removeActiveItemsByValue(valor);
+        });
+    
+        // Atualizar a lista de participantes disponíveis
+        atualizarParticipantesDisponiveis();
+    }
+    
 
     document.getElementById('adicionarAtividade').addEventListener('click', () => {
         adicionarAtividade();  // Apenas chama a função para adicionar uma nova atividade
