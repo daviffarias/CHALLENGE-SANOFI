@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulário de Pagamento do Expert</title>
     <link rel="stylesheet" href="CSS/style.css">
+    <script defer src="JS/fmvScript.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -59,32 +60,40 @@
     <form id="paymentForm" onsubmit="return handleSubmit()">
         <section id="serviceInfo">
             <h3>Informações do Serviço</h3>
-            <label for="requestorName">Nome do Solicitante:</label>
-            <input type="text" id="requestorName" name="requestorName" readonly>
-
-            <label for="sanofiEntity">Entidade Sanofi:</label>
-            <input type="text" id="sanofiEntity" name="sanofiEntity" readonly>
-
-            <label for="requestorCountry">País do Solicitante:</label>
-            <input type="text" id="requestorCountry" name="requestorCountry" readonly>
-
-            <label for="projectTitle">Título do Projeto:</label>
-            <input type="text" id="projectTitle" name="projectTitle" readonly>
-
-            <label for="serviceLocation">Localização do Serviço (País):</label>
-            <input type="text" id="serviceLocation" name="serviceLocation" readonly>
-
-            <label for="serviceDate">Data do Serviço:</label>
-            <input type="date" id="serviceDate" name="serviceDate" readonly>
+        
+            <label for="tipoEvento">Tipo de Evento:</label>
+            <input type="text" id="tipoEvento" readonly>
+        
+            <label for="nomeEvento">Nome do Evento:</label>
+            <input type="text" id="nomeEvento" readonly>
+        
+            <label for="localEvento">Local do Evento:</label>
+            <input type="text" id="localEvento" readonly>
+        
+            <label for="dataEvento">Data do Evento:</label>
+            <input type="date" id="dataEvento" readonly>
+        
+            <label for="nomeSolicitante">Nome do Solicitante:</label>
+            <input type="text" id="nomeSolicitante" readonly>
+        
+            <label for="unidade">Unidade:</label>
+            <input type="text" id="unidade" readonly>
+        
+            <label for="racionalEvento">Racional do Evento:</label>
+            <textarea id="racionalEvento" readonly></textarea>
+        
+            <label for="comentariosObservacoes">Comentários ou Observações:</label>
+            <textarea id="comentariosObservacoes" readonly></textarea>
+        
         </section>
 
         <section id="contractDescription">
             <h3>Descrição do Contrato</h3>
-            <label for="expertLastName">Sobrenome do Expert:</label>
-            <input type="text" id="expertLastName" name="expertLastName" readonly>
-
             <label for="expertFirstName">Nome do Expert:</label>
-            <input type="text" id="expertFirstName" name="expertFirstName" readonly>
+            <input type="text" id="expertFirstName" readonly>
+        
+            <label for="expertLastName">Sobrenome do Expert:</label>
+            <input type="text" id="expertLastName" readonly>
 
             <label for="expertCountry">País de Prática:</label>
             <input type="text" id="expertCountry" name="expertCountry" value="Brazil" readonly>
@@ -194,71 +203,10 @@
 
         <button type="submit">Salvar</button>
         <button type="button" id="exportPDFButton">Exportar para PDF</button>
+        <button type="button" id="resetPaymentForm">Limpar Dados</button>
     </form>
 
     <!-- Carregue jsPDF antes do seu script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script>
-        // Função para atualizar a taxa por hora em USD
-        function updateHourlyRateUSD() {
-            const brlRate = parseFloat(document.getElementById('hourlyRateBRL').value);
-            if (isNaN(brlRate)) return;
-
-            fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
-                .then(response => response.json())
-                .then(data => {
-                    const usdRate = data.conversion_rates.USD;
-                    document.getElementById('hourlyRateUSD').value = (brlRate * usdRate).toFixed(2);
-                })
-                .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
-        }
-
-        // Função para lidar com o envio do formulário
-        function handleSubmit() {
-            window.location.href = 'formulario_evento.html';
-            return false;
-        }
-
-        // Adiciona o listener ao botão de exportação para PDF
-        document.getElementById('exportPDFButton').addEventListener('click', async () => {
-            try {
-                const { PDFDocument, rgb } = PDFLib;
-                const doc = await PDFDocument.create();
-                const page = doc.addPage([600, 400]);
-                const { width, height } = page.getSize();
-                const fontSize = 12;
-
-                page.drawText('Formulário de Pagamento do Expert', {
-                    x: 50,
-                    y: height - 50,
-                    size: fontSize,
-                    color: rgb(0, 0, 1)
-                });
-
-                const form = document.getElementById('paymentForm');
-                const formData = new FormData(form);
-                let y = height - 80;
-
-                formData.forEach((value, key) => {
-                    page.drawText(`${key}: ${value}`, {
-                        x: 50,
-                        y: y,
-                        size: fontSize,
-                        color: rgb(0, 0, 0)
-                    });
-                    y -= 15;
-                });
-
-                const pdfBytes = await doc.save();
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'formulario-expert.pdf';
-                link.click();
-            } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
-            }
-        });
-    </script>
 </body>
 </html>

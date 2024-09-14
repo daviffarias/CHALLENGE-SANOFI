@@ -1,8 +1,9 @@
+let todosOsParticipantes = new Set();
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('eventForm');
     const downloadButton = document.getElementById('downloadPDF');
     const participantesSelects = [];
-    let todosOsParticipantes = new Set();
+    
 
     function validateForm() {
         const nomeEvento = document.getElementById('nomeEvento').value.trim();
@@ -18,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 participantes.add(nome);
             }
         });
-
+    
+        // Atualize a variável global todosOsParticipantes
         todosOsParticipantes = new Set(participantes);
         participantesSelects.forEach(select => {
             const currentSelected = new Set(select.getValue(true));
@@ -29,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
             select.clearStore();
             select.setChoices(updatedChoices, 'value', 'label', false);
-
+    
             currentSelected.forEach(nome => {
                 if (todosOsParticipantes.has(nome)) {
                     select.setChoiceByValue(nome);
@@ -37,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    
 
     function atualizarParticipantesNoFormulario(selectModificado) {
         const valorSelecionado = selectModificado.getValue(true);
@@ -62,76 +65,109 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Função para remover um participante
     function removerParticipante(nome) {
-        todosOsParticipantes.delete(nome);
-
-        participantesSelects.forEach(select => {
-            const choicesInstance = select;
-            if (choicesInstance) {
-                choicesInstance.removeActiveItemsByValue(nome);
+        const confirmar = confirm(`Você tem certeza de que deseja excluir todos os dados do participante "${nome}"? Esta ação não pode ser desfeita.`);
+        
+        if (confirmar) {
+            
+            // Verificar se o nome está no Set antes de tentar remover
+            if (todosOsParticipantes.has(nome)) {
+                todosOsParticipantes.delete(nome);
+                console.log(`Participante "${nome}" removido.`);
+            } else {
+                console.log(`Participante "${nome}" não encontrado na lista.`);
             }
-        });
-
-        atualizarParticipantesDisponiveis();
-        localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
-    }
-
-    function criarParticipanteDiv(nome = '', tipo = 'expert') {
-        const participanteDiv = document.createElement('div');
-        participanteDiv.classList.add('participante');
     
-        participanteDiv.innerHTML = `
-            <label for="nomeParticipante">Nome:</label>
-            <input type="text" name="nomeParticipante" value="${nome}">
-            <label for="tipoParticipante">Tipo:</label>
-            <select name="tipoParticipante">
-                <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
-                <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
-            </select>
-            <button type="button" class="removerParticipante">Remover Participante</button>
-            <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
-        `;
+            // Atualizar a lista de participantes no localStorage
+            localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
     
-        const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
-        const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
-        const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
+            // Atualizar a lista de participantes na página
+            document.querySelectorAll('.participante').forEach(participanteDiv => {
+                const nomeParticipante = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
+                if (nomeParticipante === nome) {
+                    participanteDiv.remove();
+                }
+            });
     
-        // Função para atualizar o estado do botão
-        function verificarCondicoes() {
-            const nome = nomeInput.value.trim();
-            const tipo = tipoSelect.value;
-            abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+            // Atualizar select boxes
+            participantesSelects.forEach(select => {
+                select.removeActiveItemsByValue(nome);
+            });
+    
+            atualizarParticipantesDisponiveis();
+    
+            // Verificar após a remoção
+            console.log('Participantes após a remoção:', [...todosOsParticipantes]);
+            
+            // Verificar localStorage
+            console.log('LocalStorage participantes:', JSON.parse(localStorage.getItem('participantes')));
+            
+            // Remover o formulário de pagamento associado ao participante
+            localStorage.removeItem(`paymentFormData-${nome}`);
         }
-    
-        // Configurar eventos
-        nomeInput.addEventListener('blur', () => {
-            const nome = nomeInput.value.trim();
-            if (nome) {
-                adicionarParticipante(nome);
-            }
-            verificarCondicoes();
-        });
-    
-        tipoSelect.addEventListener('change', verificarCondicoes);
-    
-        abrirFormularioBtn.addEventListener('click', () => {
-            const nome = nomeInput.value.trim();
-            if (nome) {
-                window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}&expertType=${encodeURIComponent(tipoSelect.value)}`;
-            }
-        });
-    
-        participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
-            const nome = nomeInput.value.trim();
-            if (nome) {
-                removerParticipante(nome);
-                participanteDiv.remove();
-            }
-        });
-    
-        verificarCondicoes();
-        document.getElementById('listaParticipantes').appendChild(participanteDiv);
     }
+    
+
+// Função para criar um div de participante
+function criarParticipanteDiv(nome = '', tipo = 'expert') {
+    const participanteDiv = document.createElement('div');
+    participanteDiv.classList.add('participante');
+
+    participanteDiv.innerHTML = `
+        <label for="nomeParticipante">Nome:</label>
+        <input type="text" name="nomeParticipante" value="${nome}">
+        <label for="tipoParticipante">Tipo:</label>
+        <select name="tipoParticipante">
+            <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
+            <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
+        </select>
+        <button type="button" class="removerParticipante">Remover Participante</button>
+        <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
+    `;
+
+    const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
+    const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
+    const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
+
+    // Função para atualizar o estado do botão
+    function verificarCondicoes() {
+        const nome = nomeInput.value.trim();
+        const tipo = tipoSelect.value;
+        abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+    }
+
+    // Configurar eventos
+    nomeInput.addEventListener('blur', () => {
+        const nome = nomeInput.value.trim();
+        if (nome) {
+            adicionarParticipante(nome);
+        }
+        verificarCondicoes();
+    });
+
+    tipoSelect.addEventListener('change', verificarCondicoes);
+
+    abrirFormularioBtn.addEventListener('click', () => {
+        const nome = nomeInput.value.trim();
+        if (nome) {
+            window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}`;
+        }
+    });
+    
+
+    participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
+        const nome = nomeInput.value.trim();
+        if (nome) {
+            removerParticipante(nome);
+            participanteDiv.remove();
+        }
+    });
+
+    verificarCondicoes();
+    document.getElementById('listaParticipantes').appendChild(participanteDiv);
+}
+
     
 
     // Carrega os participantes armazenados ao carregar a página
@@ -148,27 +184,25 @@ document.addEventListener('DOMContentLoaded', () => {
         criarParticipanteDiv();
     });
 
-    document.getElementById('adicionarAtividade').addEventListener('click', () => {
+    function adicionarAtividade(descricao = '', salaLink = '', dataHora = '', teveRefeicao = false) {
         const atividadeDiv = document.createElement('div');
         atividadeDiv.classList.add('atividade');
         atividadeDiv.innerHTML = `
             <label for="descricaoAtividade">Descrição da Atividade:</label>
-            <input type="text" name="descricaoAtividade">
+            <input type="text" name="descricaoAtividade" value="${descricao}">
             <label for="salaLink">Sala ou Link:</label>
-            <input type="text" name="salaLink">
+            <input type="text" name="salaLink" value="${salaLink}">
             <label for="dataHoraAtividade">Data e Horário:</label>
-            <input type="datetime-local" name="dataHoraAtividade">
+            <input type="datetime-local" name="dataHoraAtividade" value="${dataHora}">
             <label for="teveRefeicao">Teve Refeição?</label>
-            <input type="checkbox" name="teveRefeicao">
+            <input type="checkbox" name="teveRefeicao" ${teveRefeicao ? 'checked' : ''}>
             <label for="palestrantes">Palestrantes (Computam Horas):</label>
             <select name="palestrantes" multiple></select>
-            <label for="outrosParticipantes">Outros Participantes:</label>
+            <label for="outrosParticipantes">Participação ativa requerida:</label>
             <select name="outrosParticipantes" multiple></select>
             <button type="button" class="removerAtividade">Remover Atividade</button>
         `;
-
-        document.getElementById('listaAtividades').appendChild(atividadeDiv);
-
+        
         const palestrantesSelect = atividadeDiv.querySelector('select[name="palestrantes"]');
         const outrosParticipantesSelect = atividadeDiv.querySelector('select[name="outrosParticipantes"]');
 
@@ -195,6 +229,12 @@ document.addEventListener('DOMContentLoaded', () => {
             atividadeDiv.remove();
             atualizarParticipantesDisponiveis();
         });
+
+        document.getElementById('listaAtividades').appendChild(atividadeDiv);
+    }
+
+    document.getElementById('adicionarAtividade').addEventListener('click', () => {
+        adicionarAtividade();  // Apenas chama a função para adicionar uma nova atividade
     });
 
     downloadButton.addEventListener('click', async () => {
@@ -323,4 +363,92 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(url);
     }
     
+
+    function saveData() {
+        const participantes = [];
+        document.querySelectorAll('.participante').forEach(participanteDiv => {
+            const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value;
+            const tipo = participanteDiv.querySelector('select[name="tipoParticipante"]').value;
+            participantes.push({ nome, tipo });
+        });
+    
+        const atividades = [];
+        document.querySelectorAll('.atividade').forEach(atividadeDiv => {
+            const descricao = atividadeDiv.querySelector('input[name="descricaoAtividade"]').value;
+            const salaLink = atividadeDiv.querySelector('input[name="salaLink"]').value;
+            const dataHora = atividadeDiv.querySelector('input[name="dataHoraAtividade"]').value;
+            const teveRefeicao = atividadeDiv.querySelector('input[name="teveRefeicao"]').checked;
+            atividades.push({ descricao, salaLink, dataHora, teveRefeicao });
+        });
+    
+        const formData = {
+            tipoEvento: document.getElementById('tipoEvento').value,
+            nomeEvento: document.getElementById('nomeEvento').value,
+            dataEvento: document.getElementById('dataEvento').value,
+            localEvento: document.getElementById('localEvento').value,
+            nomeSolicitante: document.getElementById('nomeSolicitante').value,
+            unidade: document.getElementById('unidade').value,
+            racionalEvento: document.getElementById('racionalEvento').value,
+            comentariosObservacoes: document.getElementById('comentariosObservacoes').value,
+            participantes,
+            atividades
+        };
+    
+        localStorage.setItem('formData', JSON.stringify(formData));
+    }
+
+    function restoreData() {
+        const savedData = JSON.parse(localStorage.getItem('formData'));
+        if (savedData) {
+            document.getElementById('tipoEvento').value = savedData.tipoEvento;
+            document.getElementById('nomeEvento').value = savedData.nomeEvento;
+            document.getElementById('dataEvento').value = savedData.dataEvento;
+            document.getElementById('localEvento').value = savedData.localEvento;
+            document.getElementById('nomeSolicitante').value = savedData.nomeSolicitante;
+            document.getElementById('unidade').value = savedData.unidade;
+            document.getElementById('racionalEvento').value = savedData.racionalEvento;
+            document.getElementById('comentariosObservacoes').value = savedData.comentariosObservacoes;
+    
+            // Restaurar participantes
+            if (savedData.participantes) {
+                savedData.participantes.forEach(participante => {
+                    adicionarParticipante(participante.nome, participante.tipo);
+                });
+            }
+    
+            // Restaurar atividades
+            if (savedData.atividades) {
+                savedData.atividades.forEach(atividade => {
+                    adicionarAtividade(atividade.descricao, atividade.salaLink, atividade.dataHora, atividade.teveRefeicao);
+                });
+            }
+        }
+    }
+    
+
+    // Função para limpar os dados do formulário e do localStorage
+    function resetForm() {
+        if (confirm('Você tem certeza de que deseja resetar o formulário?')) {
+            // Limpar dados do formulário
+            document.getElementById('eventForm').reset();
+        
+            // Limpar atividades
+            document.getElementById('listaAtividades').innerHTML = '';
+        
+            // Limpar participantes
+            document.getElementById('listaParticipantes').innerHTML = '';
+        
+            // Remover dados do localStorage
+            localStorage.removeItem('formData');
+        }
+    }
+
+    // Salvar os dados sempre que houver uma mudança no formulário
+    document.getElementById('eventForm').addEventListener('change', saveData);
+
+    // Restaurar os dados ao carregar a página
+    window.onload = restoreData;
+
+    // Adicionar funcionalidade ao botão de reset
+    document.getElementById('resetForm').addEventListener('click', resetForm);
 });
