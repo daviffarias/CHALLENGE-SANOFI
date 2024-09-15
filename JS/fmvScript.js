@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Salvando o valor do dolar em uma constante
+    getDolar();
+
     // Restaurar dados do evento do localStorage
     const savedEventData = JSON.parse(localStorage.getItem('formData'));
 
@@ -52,11 +55,25 @@ if (participantId) {
         document.getElementById('tipoParticipante').value = participante.tipo;
     }
 }
-// Função para atualizar a taxa por hora em USD
-function updateHourlyRateUSD() {
-    const brlRate = parseFloat(document.getElementById('hourlyRateBRL').value);
-    if (isNaN(brlRate)) return;
 
+// Função para salvar o valor do dolar em uma constante
+function getDolar() {
+    fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
+    .then(response => response.json())
+    .then(data => {
+        window.valorDolar = data.conversion_rates.USD;
+    })
+    .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
+}
+
+// Função para converter real para dólar
+function updateHourlyRateUSD() {
+    const valorReal = parseFloat(document.getElementById('hourlyRateBRL').value);
+    if (isNaN(valorReal)) return;
+
+    document.getElementById('hourlyRateUSD').value = (valorReal * valorDolar).toFixed(2);
+    
+    /*
     fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
         .then(response => response.json())
         .then(data => {
@@ -64,6 +81,7 @@ function updateHourlyRateUSD() {
             document.getElementById('hourlyRateUSD').value = (brlRate * usdRate).toFixed(2);
         })
         .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
+    */
 }
 
 // Adiciona o listener ao botão de exportação para PDF
