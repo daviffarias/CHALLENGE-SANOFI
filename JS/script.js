@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('eventForm');
     const downloadButton = document.getElementById('downloadPDF');
     const participantesSelects = [];
-    
+
 
     function validateForm() {
         const nomeEvento = document.getElementById('nomeEvento').value.trim();
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 participantes.add(nome);
             }
         });
-    
+
         // Atualize a variável global todosOsParticipantes
         todosOsParticipantes = new Set(participantes);
         participantesSelects.forEach(select => {
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }));
             select.clearStore();
             select.setChoices(updatedChoices, 'value', 'label', false);
-    
+
             currentSelected.forEach(nome => {
                 if (todosOsParticipantes.has(nome)) {
                     select.setChoiceByValue(nome);
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    
+
 
     function atualizarParticipantesNoFormulario(selectModificado) {
         const valorSelecionado = selectModificado.getValue(true);
@@ -68,9 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Função para remover um participante
     function removerParticipante(nome) {
         const confirmar = confirm(`Você tem certeza de que deseja excluir todos os dados do participante "${nome}"? Esta ação não pode ser desfeita.`);
-        
+
         if (confirmar) {
-            
+
             // Verificar se o nome está no Set antes de tentar remover
             if (todosOsParticipantes.has(nome)) {
                 todosOsParticipantes.delete(nome);
@@ -78,10 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 console.log(`Participante "${nome}" não encontrado na lista.`);
             }
-    
+
             // Atualizar a lista de participantes no localStorage
             localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
-    
+
             // Atualizar a lista de participantes na página
             document.querySelectorAll('.participante').forEach(participanteDiv => {
                 const nomeParticipante = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
@@ -89,34 +89,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     participanteDiv.remove();
                 }
             });
-    
+
             // Atualizar select boxes
             participantesSelects.forEach(select => {
                 select.removeActiveItemsByValue(nome);
             });
-    
+
             atualizarParticipantesDisponiveis();
-    
+
             // Verificar após a remoção
             console.log('Participantes após a remoção:', [...todosOsParticipantes]);
-            
+
             // Verificar localStorage
             console.log('LocalStorage participantes:', JSON.parse(localStorage.getItem('participantes')));
-            
+
             // Remover o formulário de pagamento associado ao participante
             localStorage.removeItem(`paymentFormData-${nome}`);
         }
     }
-    
 
-// Função para criar um div de participante
-function criarParticipanteDiv(nome = '', tipo = 'expert') {
-    const participanteDiv = document.createElement('div');
-    participanteDiv.classList.add('participante');
 
-    participanteDiv.innerHTML = `
+    // Função para criar um div de participante
+    function criarParticipanteDiv(nome = '', tipo = 'expert') {
+        const participanteDiv = document.createElement('div');
+        participanteDiv.classList.add('participante');
+
+        participanteDiv.innerHTML = `
         <label for="nomeParticipante">Nome:</label>
-        <input type="text" name="nomeParticipante" value="${nome}">
+        <input type="text" name="nomeParticipante" value="${nome}" autocomplete='off'>
         <label for="tipoParticipante">Tipo:</label>
         <select name="tipoParticipante">
             <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
@@ -126,49 +126,49 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
         <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
     `;
 
-    const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
-    const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
-    const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
+        const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
+        const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
+        const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
 
-    // Função para atualizar o estado do botão
-    function verificarCondicoes() {
-        const nome = nomeInput.value.trim();
-        const tipo = tipoSelect.value;
-        abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+        // Função para atualizar o estado do botão
+        function verificarCondicoes() {
+            const nome = nomeInput.value.trim();
+            const tipo = tipoSelect.value;
+            abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+        }
+
+        // Configurar eventos
+        nomeInput.addEventListener('blur', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                adicionarParticipante(nome);
+            }
+            verificarCondicoes();
+        });
+
+        tipoSelect.addEventListener('change', verificarCondicoes);
+
+        abrirFormularioBtn.addEventListener('click', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}`;
+            }
+        });
+
+
+        participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
+            const nome = nomeInput.value.trim();
+            if (nome) {
+                removerParticipante(nome);
+                participanteDiv.remove();
+            }
+        });
+
+        verificarCondicoes();
+        document.getElementById('listaParticipantes').appendChild(participanteDiv);
     }
 
-    // Configurar eventos
-    nomeInput.addEventListener('blur', () => {
-        const nome = nomeInput.value.trim();
-        if (nome) {
-            adicionarParticipante(nome);
-        }
-        verificarCondicoes();
-    });
 
-    tipoSelect.addEventListener('change', verificarCondicoes);
-
-    abrirFormularioBtn.addEventListener('click', () => {
-        const nome = nomeInput.value.trim();
-        if (nome) {
-            window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}`;
-        }
-    });
-    
-
-    participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
-        const nome = nomeInput.value.trim();
-        if (nome) {
-            removerParticipante(nome);
-            participanteDiv.remove();
-        }
-    });
-
-    verificarCondicoes();
-    document.getElementById('listaParticipantes').appendChild(participanteDiv);
-}
-
-    
 
     // Carrega os participantes armazenados ao carregar a página
     const participantesArmazenados = JSON.parse(localStorage.getItem('participantes')) || [];
@@ -202,49 +202,49 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             <select name="outrosParticipantes" multiple></select>
             <button type="button" class="removerAtividade">Remover Atividade</button>
         `;
-    
+
         const palestrantesSelect = atividadeDiv.querySelector('select[name="palestrantes"]');
         const outrosParticipantesSelect = atividadeDiv.querySelector('select[name="outrosParticipantes"]');
-    
+
         const choicesPalestrantes = new Choices(palestrantesSelect, { removeItemButton: true, allowHTML: true });
         const choicesOutrosParticipantes = new Choices(outrosParticipantesSelect, { removeItemButton: true, allowHTML: true });
-    
+
         participantesSelects.push(choicesPalestrantes, choicesOutrosParticipantes);
-    
+
         setTimeout(() => {
             atualizarParticipantesDisponiveis();
-    
+
             palestrantesSelect.addEventListener('change', () => {
                 atualizarParticipantesNoFormulario(choicesPalestrantes, choicesOutrosParticipantes);
             });
-    
+
             outrosParticipantesSelect.addEventListener('change', () => {
                 atualizarParticipantesNoFormulario(choicesOutrosParticipantes, choicesPalestrantes);
             });
         }, 0);
-    
+
         atividadeDiv.querySelector('.removerAtividade').addEventListener('click', () => {
             participantesSelects.splice(participantesSelects.indexOf(choicesPalestrantes), 1);
             participantesSelects.splice(participantesSelects.indexOf(choicesOutrosParticipantes), 1);
             atividadeDiv.remove();
             atualizarParticipantesDisponiveis();
         });
-    
+
         document.getElementById('listaAtividades').appendChild(atividadeDiv);
     }
-    
+
     function atualizarParticipantesNoFormulario(selectModificado, selectOposto) {
         const valorSelecionado = selectModificado.getValue(true);
-    
+
         // Remover participantes selecionados da lista oposta
         valorSelecionado.forEach(valor => {
             selectOposto.removeActiveItemsByValue(valor);
         });
-    
+
         // Atualizar a lista de participantes disponíveis
         atualizarParticipantesDisponiveis();
     }
-    
+
 
     document.getElementById('adicionarAtividade').addEventListener('click', () => {
         adicionarAtividade();  // Apenas chama a função para adicionar uma nova atividade
@@ -278,7 +278,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
 
     async function gerarPDF() {
         const { PDFDocument, rgb } = PDFLib;
-    
+
         // Coletar dados do formulário
         const nomeEvento = document.getElementById('nomeEvento').value || '';
         const localEvento = document.getElementById('localEvento').value || '';
@@ -287,7 +287,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
         const unidade = document.getElementById('unidade').value || '';
         const racionalEvento = document.getElementById('racionalEvento').value || '';
         const comentariosObservacoes = document.getElementById('comentariosObservacoes').value || '';
-    
+
         // Verifique se há participantes
         const participantes = Array.from(document.querySelectorAll('#listaParticipantes .participante')).map(participante => {
             const nomeInput = participante.querySelector('input[name="nomeParticipante"]');
@@ -297,7 +297,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
                 tipo: tipoSelect ? tipoSelect.value : ''
             };
         });
-    
+
         // Verifique se há atividades
         const atividades = Array.from(document.querySelectorAll('#listaAtividades .atividade')).map(atividade => {
             const descricaoInput = atividade.querySelector('input[name="descricaoAtividade"]');
@@ -306,7 +306,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             const teveRefeicaoCheckbox = atividade.querySelector('input[name="teveRefeicao"]');
             const palestrantesSelect = atividade.querySelector('select[name="palestrantes"]');
             const outrosParticipantesSelect = atividade.querySelector('select[name="outrosParticipantes"]');
-            
+
             return {
                 descricao: descricaoInput ? descricaoInput.value.trim() : '',
                 salaLink: salaLinkInput ? salaLinkInput.value.trim() : '',
@@ -316,13 +316,13 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
                 outrosParticipantes: outrosParticipantesSelect ? Array.from(outrosParticipantesSelect.selectedOptions).map(option => option.value) : []
             };
         });
-    
+
         const pdfDoc = await PDFDocument.create();
         const page = pdfDoc.addPage([600, 800]);
         const { height } = page.getSize();
-    
+
         let yOffset = height - 50;
-    
+
         // Dados do Evento
         page.drawText(`Nome do Evento: ${nomeEvento}`, { x: 50, y: yOffset, size: 12 });
         yOffset -= 20;
@@ -338,7 +338,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
         yOffset -= 40;
         page.drawText(`Comentários ou Observações: ${comentariosObservacoes}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
         yOffset -= 60;
-    
+
         // Participantes
         page.drawText('Participantes:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
         yOffset -= 20;
@@ -346,7 +346,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             page.drawText(`Nome: ${participante.nome} - Tipo: ${participante.tipo}`, { x: 50, y: yOffset, size: 12 });
             yOffset -= 20;
         });
-    
+
         // Agenda
         page.drawText('Agenda:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
         yOffset -= 20;
@@ -364,21 +364,21 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             page.drawText(`Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
             yOffset -= 40;
         });
-    
+
         const pdfBytes = await pdfDoc.save();
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
-    
+
         const link = document.createElement('a');
         link.href = url;
         link.download = 'evento.pdf';
         link.click();
         URL.revokeObjectURL(url);
     }
-    
+
 
     function saveData() {
-    
+
         const atividades = [];
         document.querySelectorAll('.atividade').forEach(atividadeDiv => {
             const descricao = atividadeDiv.querySelector('input[name="descricaoAtividade"]').value;
@@ -387,7 +387,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             const teveRefeicao = atividadeDiv.querySelector('input[name="teveRefeicao"]').checked;
             atividades.push({ descricao, salaLink, dataHora, teveRefeicao });
         });
-    
+
         const formData = {
             tipoEvento: document.getElementById('tipoEvento').value,
             nomeEvento: document.getElementById('nomeEvento').value,
@@ -400,7 +400,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             participantes,
             atividades
         };
-    
+
         localStorage.setItem('formData', JSON.stringify(formData));
     }
 
@@ -415,7 +415,7 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             document.getElementById('unidade').value = savedData.unidade;
             document.getElementById('racionalEvento').value = savedData.racionalEvento;
             document.getElementById('comentariosObservacoes').value = savedData.comentariosObservacoes;
-    
+
             // Restaurar atividades
             if (savedData.atividades) {
                 savedData.atividades.forEach(atividade => {
@@ -424,20 +424,20 @@ function criarParticipanteDiv(nome = '', tipo = 'expert') {
             }
         }
     }
-    
+
 
     // Função para limpar os dados do formulário e do localStorage
     function resetForm() {
         if (confirm('Você tem certeza de que deseja resetar o formulário?')) {
             // Limpar dados do formulário
             document.getElementById('eventForm').reset();
-        
+
             // Limpar atividades
             document.getElementById('listaAtividades').innerHTML = '';
-        
+
             // Limpar participantes
             document.getElementById('listaParticipantes').innerHTML = '';
-        
+
             // Remover dados do localStorage
             localStorage.removeItem('formData');
         }
