@@ -38,4 +38,5 @@ Para adicionar o autocomplete em algum input, siga os passos:
 ## Bugs:
 
 - [x] Quando eu preencho todo o formulário de pagamento de algum participante, o que eu já tinha preenchido no formulário do evento some  
-- [x] Atualmente os participantes da agenda só podem participar de uma atividade. Segundo a regra da Sanofi, eles podem participar de várias atividades dentro de um evento/agenda
+- [x] Atualmente os participantes da agenda só podem participar de uma atividade. Segundo a regra da Sanofi, eles podem participar de várias atividades dentro de um evento/agenda  
+- [ ] O botão de baixar dados combinados (pdf) as vezes não funciona, não consegui identificar o motivo
