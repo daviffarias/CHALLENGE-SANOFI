@@ -38,4 +38,5 @@ Para adicionar o autocomplete em algum input, siga os passos:
 
 - [x] Quando eu preencho todo o formulário de pagamento de algum participante, o que eu já tinha preenchido no formulário do evento some  
 - [x] Atualmente os participantes da agenda só podem participar de uma atividade. Segundo a regra da Sanofi, eles podem participar de várias atividades dentro de um evento/agenda  
-- [ ] O botão de baixar dados combinados (pdf) as vezes não funciona, não consegui identificar o motivo
+- [ ] O botão de baixar dados combinados (pdf) as vezes não funciona, não consegui identificar o motivo  
+- [ ] Os dados de participantes e agendas ficam salvos mesmo depois de preencher e enviar (talvez culpa do localStorage, sessionStorage pode resolver)  
