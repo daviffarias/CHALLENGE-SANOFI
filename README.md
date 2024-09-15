@@ -4,8 +4,7 @@
 
 ## Status
 
-- O autocomplete já está funcionando para o input "Nome do evento". 
-- 
+- O autocomplete já está funcionando para os inputs necessários.
 
 ## Adicionar autocomplete
 
