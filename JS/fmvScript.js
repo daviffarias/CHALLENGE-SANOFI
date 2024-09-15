@@ -204,5 +204,114 @@ function resetForm() {
     }
 }
 
+// Tabela de taxas baseada no nível do especialista
+const paymentRates = {
+    'tier 1 specialist': { min: 1733, standard: 1925, max: 2118 },
+    'tier 2 specialist': { min: 1395, standard: 1550, max: 1705 },
+    'tier 3 specialist': { min: 1080, standard: 1200, max: 1320 },
+    'tier 4 specialist': { min: 810, standard: 900, max: 990 },
+    'tier 5 specialist': { min: 630, standard: 700, max: 770 },
+    'tier 1 generalist': { min: 1035, standard: 1150, max: 1265 },
+    'tier 2 generalist': { min: 675, standard: 750, max: 825 },
+    'tier 3 generalist': { min: 540, standard: 600, max: 660 },
+    'tier 4 generalist': { min: 405, standard: 450, max: 495 },
+    'tier 5 generalist': { min: 315, standard: 350, max: 385 }
+};
 
+// Função para atualizar as taxas com base no nível do expert e papel
+function updatePaymentRates() {
+    const expertLevel = document.getElementById('expertLevel').value;
+    const role = document.getElementById('role').value;
+    const rates = paymentRates[expertLevel];
+
+    if (rates) {
+        let minRate = rates.min;
+        let standardRate = rates.standard;
+        let maxRate = rates.max;
+
+        // Verificar se o papel é "Chairman" e multiplicar as taxas por 1,2
+        if (role === 'Chairman') {
+            minRate *= 1.2;
+            standardRate *= 1.2;
+            maxRate *= 1.2;
+        }
+
+        document.getElementById('minRate').value = minRate.toFixed(2);
+        document.getElementById('standardRate').value = standardRate.toFixed(2);
+        document.getElementById('maxRate').value = maxRate.toFixed(2);
+
+        // Validar se a taxa por hora está dentro do intervalo recomendado
+        validateHourlyRate(minRate, maxRate);
+    }
+}
+
+// Função para validar a taxa por hora e alterar a cor do campo conforme necessário
+function validateHourlyRate(minRate, maxRate) {
+    const hourlyRateBRL = parseFloat(document.getElementById('hourlyRateBRL').value);
+    
+    // Verifica se o valor está dentro do intervalo e altera a cor do campo
+    if (!isNaN(hourlyRateBRL)) {
+        if (hourlyRateBRL < minRate || hourlyRateBRL > maxRate) {
+            document.getElementById('hourlyRateBRL').style.backgroundColor = 'red';
+        } else {
+            document.getElementById('hourlyRateBRL').style.backgroundColor = 'lightgreen';
+        }
+    } else {
+        // Se o campo estiver vazio ou não for um número, restaura o fundo original
+        document.getElementById('hourlyRateBRL').style.backgroundColor = '';
+    }
+}
+
+// Adicionar listener para quando o nível do expert, papel ou taxa por hora for alterado
+document.getElementById('expertLevel').addEventListener('change', updatePaymentRates);
+document.getElementById('role').addEventListener('change', updatePaymentRates);
+document.getElementById('hourlyRateBRL').addEventListener('input', () => {
+    const minRate = parseFloat(document.getElementById('minRate').value);
+    const maxRate = parseFloat(document.getElementById('maxRate').value);
+    
+    // Validar a taxa por hora ao inserir manualmente
+    validateHourlyRate(minRate, maxRate);
+});
+
+// Mapeamento da compensação do tempo de viagem em horas
+const travelTimeCompensation = {
+    '0 - 80 km': 0.50,
+    '81 - 160 km': 1.00,
+    '161 - 400 km': 2.00,
+    '401 - 1200 km': 3.00,
+    '1201 - 8000 km': 4.00,
+    '8001 - 16000 km': 5.00,
+    '16001 - 32000 km': 7.50,
+    'above 32000 km': 10.00
+};
+
+// Função para calcular o Total Fee
+function calculateTotalFee() {
+    const serviceHours = parseFloat(document.getElementById('serviceDuration').value) || 0;
+    const preparationHours = parseFloat(document.getElementById('preparationTime').value) || 0;
+    const travelTime = document.getElementById('travelTime').value;
+    const travelCompensation = travelTimeCompensation[travelTime] || 0;
+
+    const hourlyRateBRL = parseFloat(document.getElementById('hourlyRateBRL').value) || 0;
+    const hourlyRateUSD = parseFloat(document.getElementById('hourlyRateUSD').value) || 0;
+
+    // Total de horas pagas (tempo de serviço + tempo de preparação + compensação de viagem)
+    const totalPaidHours = serviceHours + preparationHours + travelCompensation;
+    document.getElementById('totalPaidHours').value = totalPaidHours.toFixed(2);
+
+    // Cálculo do Total Fee em BRL e USD
+    const totalFeeBRL = totalPaidHours * hourlyRateBRL;
+    const totalFeeUSD = totalPaidHours * hourlyRateUSD;
+
+    // Atualiza os campos de total fee
+    document.getElementById('totalFeeBRL').value = totalFeeBRL.toFixed(2);
+    document.getElementById('totalFeeUSD').value = totalFeeUSD.toFixed(2);
+}
+
+// Adicionar listeners para recalcular o total quando o usuário alterar qualquer campo relevante
+document.getElementById('serviceDuration').addEventListener('input', calculateTotalFee);
+document.getElementById('preparationTime').addEventListener('input', calculateTotalFee);
+document.getElementById('travelTime').addEventListener('change', calculateTotalFee);
+document.getElementById('hourlyRateBRL').addEventListener('input', calculateTotalFee);
+document.getElementById('hourlyRateUSD').addEventListener('input', calculateTotalFee);
 

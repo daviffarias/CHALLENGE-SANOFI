@@ -101,7 +101,7 @@
             <label for="serviceType">Tipo de Serviço:</label>
             <select id="serviceType" name="serviceType">
                 <option value="advisory board">Advisory Board</option>
-                <option value="clinical research activities">Clinical Research Activities</option>
+                <!-- <option value="clinical research activities">Clinical Research Activities</option> -->
                 <option value="consulting service">Consulting Service</option>
                 <option value="investigator meeting">Investigator Meeting</option>
                 <option value="Sanofi preceptorship">Sanofi Preceptorship</option>
@@ -136,6 +136,22 @@
                 <option value="tier 4 generalist">Tier 4 Generalist</option>
                 <option value="tier 5 generalist">Tier 5 Generalist</option>
             </select>
+
+            <section id="paymentRates">
+                <h3>Recomendações de Pagamento</h3>
+                
+                <label for="standardRate">Taxa Padrão (BRL):</label>
+                <input type="number" id="standardRate" name="standardRate" readonly>
+                
+                <label for="minRate">Taxa Mínima (BRL):</label>
+                <input type="number" id="minRate" name="minRate" readonly>
+                
+                <label for="maxRate">Taxa Máxima (BRL):</label>
+                <input type="number" id="maxRate" name="maxRate" readonly>
+
+                <h3></h3>
+            </section>
+            
 
             <label for="hourlyRateBRL">Taxa por Hora (BRL):</label>
             <input type="number" id="hourlyRateBRL" name="hourlyRateBRL" step="0.01" oninput="updateHourlyRateUSD()">
@@ -196,6 +212,20 @@
                 <option value="16001 - 32000 km">16001 - 32000 km</option>
                 <option value="above 32000 km">Acima de 32000 km</option>
             </select>
+
+            <section id="feeCalculation">
+                <h3>Cálculo do Pagamento Total</h3>
+                
+                <label for="totalPaidHours">Total de Horas Pagas:</label>
+                <input type="number" id="totalPaidHours" readonly>
+                
+                <label for="totalFeeBRL">Total Fee (BRL):</label>
+                <input type="number" id="totalFeeBRL" readonly>
+                
+                <label for="totalFeeUSD">Total Fee (USD):</label>
+                <input type="number" id="totalFeeUSD" readonly>
+            </section>
+            
 
             <label for="additionalInfo">Informações e/ou Justificativas Adicionais:</label>
             <textarea id="additionalInfo" name="additionalInfo"></textarea>

@@ -4,13 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadButton = document.getElementById('downloadPDF');
     const participantesSelects = [];
 
-
-    function validateForm() {
-        const nomeEvento = document.getElementById('nomeEvento').value.trim();
-        const dataEvento = document.getElementById('dataEvento').value.trim();
-        downloadButton.disabled = !(nomeEvento && dataEvento);
-    }
-
     function atualizarParticipantesDisponiveis() {
         const participantes = new Set();
         document.querySelectorAll('.participante').forEach(participanteDiv => {
@@ -168,16 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('listaParticipantes').appendChild(participanteDiv);
     }
 
-
-
     // Carrega os participantes armazenados ao carregar a página
     const participantesArmazenados = JSON.parse(localStorage.getItem('participantes')) || [];
     participantesArmazenados.forEach(nome => {
         criarParticipanteDiv(nome);
-    });
-
-    form.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', validateForm);
     });
 
     document.getElementById('adicionarParticipante').addEventListener('click', () => {
@@ -277,9 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function gerarPDF() {
-        const { PDFDocument, rgb } = PDFLib;
+        const { PDFDocument, rgb, StandardFonts } = PDFLib;
 
         // Coletar dados do formulário
+        const tipoEvento = document.getElementById('tipoEvento').value || '';
         const nomeEvento = document.getElementById('nomeEvento').value || '';
         const localEvento = document.getElementById('localEvento').value || '';
         const dataEvento = document.getElementById('dataEvento').value || '';
@@ -288,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const racionalEvento = document.getElementById('racionalEvento').value || '';
         const comentariosObservacoes = document.getElementById('comentariosObservacoes').value || '';
 
-        // Verifique se há participantes
         const participantes = Array.from(document.querySelectorAll('#listaParticipantes .participante')).map(participante => {
             const nomeInput = participante.querySelector('input[name="nomeParticipante"]');
             const tipoSelect = participante.querySelector('select[name="tipoParticipante"]');
@@ -298,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
 
-        // Verifique se há atividades
         const atividades = Array.from(document.querySelectorAll('#listaAtividades .atividade')).map(atividade => {
             const descricaoInput = atividade.querySelector('input[name="descricaoAtividade"]');
             const salaLinkInput = atividade.querySelector('input[name="salaLink"]');
@@ -321,47 +307,81 @@ document.addEventListener('DOMContentLoaded', () => {
         const page = pdfDoc.addPage([600, 800]);
         const { height } = page.getSize();
 
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
         let yOffset = height - 50;
 
-        // Dados do Evento
-        page.drawText(`Nome do Evento: ${nomeEvento}`, { x: 50, y: yOffset, size: 12 });
-        yOffset -= 20;
-        page.drawText(`Local do Evento: ${localEvento}`, { x: 50, y: yOffset, size: 12 });
-        yOffset -= 20;
-        page.drawText(`Data do Evento: ${dataEvento}`, { x: 50, y: yOffset, size: 12 });
-        yOffset -= 20;
-        page.drawText(`Nome do Solicitante: ${nomeSolicitante}`, { x: 50, y: yOffset, size: 12 });
-        yOffset -= 20;
-        page.drawText(`Unidade: ${unidade}`, { x: 50, y: yOffset, size: 12 });
-        yOffset -= 20;
-        page.drawText(`Racional do Evento: ${racionalEvento}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
-        yOffset -= 40;
-        page.drawText(`Comentários ou Observações: ${comentariosObservacoes}`, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
-        yOffset -= 60;
+        // Títulos principais com fonte maior
+        page.setFont(fontBold);
+        page.setFontSize(18);
+        page.drawText('Informações do Evento', { x: 50, y: yOffset, color: rgb(0.2, 0.2, 0.7) });
+        yOffset -= 30;
 
-        // Participantes
-        page.drawText('Participantes:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
+        page.setFontSize(12);
+        page.setFont(font);
+
+        // Estilização das informações com espaçamento
+        const addText = (label, value, x, y) => {
+            page.drawText(`${label}: ${value}`, { x, y, size: 12 });
+        };
+
+        addText('Tipo de Evento', tipoEvento, 50, yOffset);
         yOffset -= 20;
+        addText('Nome do Evento', nomeEvento, 50, yOffset);
+        yOffset -= 20;
+        addText('Local do Evento', localEvento, 50, yOffset);
+        yOffset -= 20;
+        addText('Data do Evento', dataEvento, 50, yOffset);
+        yOffset -= 20;
+        addText('Nome do Solicitante', nomeSolicitante, 50, yOffset);
+        yOffset -= 20;
+        addText('Unidade', unidade, 50, yOffset);
+        yOffset -= 20;
+        page.setFont(fontBold);
+        page.drawText('Racional do Evento', { x: 50, y: yOffset, size: 14, color: rgb(0.2, 0.2, 0.7) });
+        yOffset -= 20;
+        page.setFont(font);
+        page.drawText(racionalEvento, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
+        yOffset -= 40;
+
+        page.setFont(fontBold);
+        page.drawText('Comentários ou Observações', { x: 50, y: yOffset, size: 14, color: rgb(0.2, 0.2, 0.7) });
+        yOffset -= 20;
+        page.setFont(font);
+        page.drawText(comentariosObservacoes, { x: 50, y: yOffset, size: 12, maxWidth: 500 });
+        yOffset -= 40;
+
+        // Seção de participantes com borda e espaçamento
+        page.setFont(fontBold);
+        page.drawText('Participantes', { x: 50, y: yOffset, size: 14, color: rgb(0.2, 0.2, 0.7) });
+        yOffset -= 20;
+
         participantes.forEach((participante, index) => {
-            page.drawText(`Nome: ${participante.nome} - Tipo: ${participante.tipo}`, { x: 50, y: yOffset, size: 12 });
+            page.setFont(font);
+            page.drawText(`Nome: ${participante.nome} - Tipo: ${participante.tipo}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 20;
         });
 
-        // Agenda
-        page.drawText('Agenda:', { x: 50, y: yOffset, size: 12, color: rgb(0, 0, 1) });
+        // Seção da agenda com borda e formatação estilizada
         yOffset -= 20;
+        page.setFont(fontBold);
+        page.drawText('Agenda', { x: 50, y: yOffset, size: 14, color: rgb(0.2, 0.2, 0.7) });
+        yOffset -= 20;
+
         atividades.forEach((atividade, index) => {
-            page.drawText(`Descrição: ${atividade.descricao}`, { x: 50, y: yOffset, size: 12 });
+            page.setFont(font);
+            page.drawText(`Descrição: ${atividade.descricao}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 20;
-            page.drawText(`Sala/Link: ${atividade.salaLink}`, { x: 50, y: yOffset, size: 12 });
+            page.drawText(`Sala/Link: ${atividade.salaLink}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 20;
-            page.drawText(`Data e Hora: ${atividade.dataHora}`, { x: 50, y: yOffset, size: 12 });
+            page.drawText(`Data e Hora: ${atividade.dataHora}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 20;
-            page.drawText(`Teve Refeição: ${atividade.teveRefeicao ? 'Sim' : 'Não'}`, { x: 50, y: yOffset, size: 12 });
+            page.drawText(`Teve Refeição: ${atividade.teveRefeicao ? 'Sim' : 'Não'}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 20;
-            page.drawText(`Palestrantes: ${atividade.palestrantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
+            page.drawText(`Palestrantes: ${atividade.palestrantes.join(', ')}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 20;
-            page.drawText(`Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, { x: 50, y: yOffset, size: 12 });
+            page.drawText(`Outros Participantes: ${atividade.outrosParticipantes.join(', ')}`, { x: 60, y: yOffset, size: 12 });
             yOffset -= 40;
         });
 
@@ -375,6 +395,7 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
         URL.revokeObjectURL(url);
     }
+
 
 
     function saveData() {
