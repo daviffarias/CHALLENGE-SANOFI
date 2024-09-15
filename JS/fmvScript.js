@@ -131,9 +131,15 @@ function saveData() {
     const formData = new FormData(form);
     const data = {};
 
+    // Salva todos os dados do formulário no objeto `data`
     formData.forEach((value, key) => {
         data[key] = value;
     });
+
+    // Salvar também os campos calculados (Total Paid Hours, Total Fee BRL, Total Fee USD)
+    data.totalPaidHours = document.getElementById('totalPaidHours').value;
+    data.totalFeeBRL = document.getElementById('totalFeeBRL').value;
+    data.totalFeeUSD = document.getElementById('totalFeeUSD').value;
 
     const nomeParticipante = urlParams.get('expertName'); // Pega o nome do participante da URL
     if (nomeParticipante) {
@@ -141,6 +147,10 @@ function saveData() {
         localStorage.setItem(`paymentFormData-${nomeParticipante}`, JSON.stringify(data));
     }
 }
+
+// Salva os dados do formulário antes de enviar
+document.getElementById('paymentForm').addEventListener('submit', saveData);
+
 
 
 // Função para restaurar os dados do formulário a partir do localStorage
@@ -153,6 +163,7 @@ function restoreData() {
             const data = JSON.parse(savedData);
             const form = document.getElementById('paymentForm');
 
+            // Restaura todos os campos salvos
             Object.keys(data).forEach(key => {
                 const element = form.elements[key];
                 if (element) {
@@ -163,6 +174,11 @@ function restoreData() {
                     }
                 }
             });
+
+            // Restaurar campos calculados manualmente
+            document.getElementById('totalPaidHours').value = data.totalPaidHours || '';
+            document.getElementById('totalFeeBRL').value = data.totalFeeBRL || '';
+            document.getElementById('totalFeeUSD').value = data.totalFeeUSD || '';
         }
     }
 }
@@ -196,6 +212,11 @@ function resetForm() {
             }
         });
 
+        // Limpa os campos calculados
+        document.getElementById('totalPaidHours').value = '';
+        document.getElementById('totalFeeBRL').value = '';
+        document.getElementById('totalFeeUSD').value = '';
+
         // Remove dados do localStorage para o participante atual
         const nomeParticipante = urlParams.get('expertName');
         if (nomeParticipante) {
@@ -203,6 +224,10 @@ function resetForm() {
         }
     }
 }
+
+// Adiciona o listener para o botão de reset
+document.getElementById('resetPaymentForm').addEventListener('click', resetForm);
+
 
 // Tabela de taxas baseada no nível do especialista
 const paymentRates = {
