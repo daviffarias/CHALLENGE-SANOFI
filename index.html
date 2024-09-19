@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="CSS/style.css">
     <script src="JS/geraPDF.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
+    <script>
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+                if (params.has('error')) {
+                    alert('Usuário ou senha incorretos!');
+                }
+        };
+
+    </script>
 
 </head>
 

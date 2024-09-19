@@ -18,11 +18,7 @@ try {
             header('Location: ../painel_admin.html');
             exit;
         } else {
-            echo "Usuário ou senha incorretos!";
-            echo $username;
-            echo $password;
-            print_r($user);
-            echo $password_verify($password, $user['password']);
+            header('Location: ../index.html?error=1');
         }
     }
 } catch (PDOException $e) {
