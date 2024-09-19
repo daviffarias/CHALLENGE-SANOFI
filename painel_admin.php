@@ -1,3 +1,14 @@
+<?php
+session_start();
+if ($_SESSION['loggedin'] == false) {
+    header('Location: ../index.html');
+    exit();
+}
+
+
+
+?>
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>

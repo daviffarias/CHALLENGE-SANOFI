@@ -15,9 +15,10 @@ try {
 
         if ($user && $user['password'] === $password) {
             $_SESSION['loggedin'] = true;
-            header('Location: ../painel_admin.html');
+            header('Location: ../painel_admin.php');
             exit;
         } else {
+            $_SESSION['loggedin'] = false;
             header('Location: ../index.html?error=1');
         }
     }
