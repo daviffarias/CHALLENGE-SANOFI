@@ -7,8 +7,13 @@
     <title>FusionTech</title>
     <link rel="stylesheet" href="CSS/style.css">
     <script src="JS/geraPDF.js" defer></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pdf-lib/dist/pdf-lib.min.js"></script>
     <script src="./JS/variaveis.js"></script>
+    <script src="./JS/geraPDFGeral.js" defer></script>
     <script>
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
@@ -41,7 +46,7 @@
     <section class="hero">
         <h2>Simplifique a validação de dados</h2>
         <p>Automatize tarefas repetitivas e concentre-se no que realmente importa.</p>
-        <a href="#about" class="btn">Saiba Mais</a>
+        <button type="button" class="btn" id="botaoSacrificio">Saiba Mais</button>
     </section>
     
     <section id="about" class="about">
