@@ -14,7 +14,7 @@ document.getElementById('botaoSacrificio').addEventListener('click', async funct
 async function createPDF() {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([600, 950]);
+    const page = pdfDoc.addPage([600, 900]);
     const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
@@ -34,7 +34,7 @@ async function createPDF() {
 
     // Formatação
     const inicioX = 50; // O fim é no 550
-    const inicioY = 910;
+    const inicioY = 860;
     const gapTexto = 20;
     const gapColunaHorizontal = 200;
     const gapColunaVertical = 15;
@@ -235,7 +235,8 @@ for (let j = 0; j < tituloAtividade.length; j++) {
 }
 
 
-
+    // Segunda página
+    const page2 = pdfDoc.addPage([600, 900]);
 
     
     
