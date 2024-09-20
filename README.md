@@ -6,8 +6,7 @@
 
 - O autocomplete já está funcionando para os inputs necessários.
 - O sistema de login admin está funcionando para controlar variáveis globais (tabela users)
-- O PDF de pagamento está estilizado
-- **FALTA ESTILIZAR O PDF GERAL**
+- Os dois PDFs estão estilizados
 - **FALTA USAR AS VARIÁVEIS GLOBAIS NO JAVASCRIPT**
   
 
