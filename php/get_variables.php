@@ -6,6 +6,5 @@ include 'variaveis_globais.php';
 header('Content-Type: application/json');
 echo json_encode([
     'var1' => $var1,
-    'var2' => $var2,
 ]);
 ?>
