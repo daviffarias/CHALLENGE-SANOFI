@@ -72,58 +72,7 @@ function updateHourlyRateUSD() {
     if (isNaN(valorReal)) return;
 
     document.getElementById('hourlyRateUSD').value = (valorReal * valorDolar).toFixed(2);
-    
-    /*
-    fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
-        .then(response => response.json())
-        .then(data => {
-            const usdRate = data.conversion_rates.USD;
-            document.getElementById('hourlyRateUSD').value = (brlRate * usdRate).toFixed(2);
-        })
-        .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
-    */
 }
-
-// Adiciona o listener ao botão de exportação para PDF
-document.getElementById('exportPDFButton').addEventListener('click', async () => {
-    try {
-        const { PDFDocument, rgb } = PDFLib;
-        const doc = await PDFDocument.create();
-        const page = doc.addPage([600, 400]);
-        const { width, height } = page.getSize();
-        const fontSize = 12;
-
-        page.drawText('Formulário de Pagamento do Expert', {
-            x: 50,
-            y: height - 50,
-            size: fontSize,
-            color: rgb(0, 0, 1)
-        });
-
-        const form = document.getElementById('paymentForm');
-        const formData = new FormData(form);
-        let y = height - 80;
-
-        formData.forEach((value, key) => {
-            page.drawText(`${key}: ${value}`, {
-                x: 50,
-                y: y,
-                size: fontSize,
-                color: rgb(0, 0, 0)
-            });
-            y -= 15;
-        });
-
-        const pdfBytes = await doc.save();
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'formulario-expert.pdf';
-        link.click();
-    } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-    }
-});
 
 // Função para salvar os dados do formulário no localStorage
 function saveData() {

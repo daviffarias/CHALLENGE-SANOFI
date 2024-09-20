@@ -1,11 +1,14 @@
-document.getElementById('botaotestepdf').addEventListener('click', async function () {
+const expertName = urlParams.get('expertName');
+const tipoEvento = urlParams.get('tipoEvento');
+
+document.getElementById('exportPDFButton').addEventListener('click', async function () {
     const pdfBytes = await createPDF();
 
     // Cria um Blob para download
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'teste.pdf';
+    link.download = `FMV - ${expertName}.pdf`;
 
     // Simula o clique no link para fazer o download
     link.click();
@@ -157,7 +160,7 @@ async function createPDF() {
     const header2 = ['Contract description'];
     const content2 = [
         ['Expert Last Name', 'Teste FIAP'],
-        ['Expert First Name', 'Teste FIAP'],
+        ['Expert First Name', expertName],
         ['Expert country of practice', 'Brazil'],
         ['Service type', 'Symposium within the framework of a congress'],
         ['Role', 'Speaker'],
