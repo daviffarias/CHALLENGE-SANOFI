@@ -85,6 +85,10 @@ function saveData() {
         data[key] = value;
     });
 
+    const travelTime = document.getElementById('travelTime').value;
+    const travelCompensation = travelTimeCompensation[travelTime] || 0;  // Calcula o valor da compensação
+    data.travelCompensation = travelCompensation.toFixed(2);  // Armazena a compensação
+
     // Salvar também os campos calculados (Total Paid Hours, Total Fee BRL, Total Fee USD)
     data.totalPaidHours = document.getElementById('totalPaidHours').value;
     data.totalFeeBRL = document.getElementById('totalFeeBRL').value;

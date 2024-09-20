@@ -35,12 +35,11 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador
 - [x] Tempo de Viagem: Colocar o calculo do pagamento de acordo com as faixas de km de deslocamento  
 - [x] Ajustar espelhamento da Agenda -> FMV
-- [ ] Corrigir salvamento (sessionStorage)
+- [ ] Corrigir salvamento (sessionStorage) e adicionar salvemento automático
 - [x] Ajustar regra de participantes de cada atividade. Participante só pode ser Palestrante **OU** Participação requerida, porém **pode** participar de outras atividades na mesma agenda
 - [ ] Otimizar código, remover repetições e padronizar (opcional)
 - [x] Remover validação para downloadButton
-- [ ] Adicionar campo nome do projeto/agenda
-- [ ] Refletir variavéis na impressão do pdf
+- [x] Refletir variáveis na impressão do pdf
 - [x] linkar tag botão download pdf
 
 ## Bugs:

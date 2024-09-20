@@ -1,5 +1,11 @@
 const expertName = urlParams.get('expertName');
-const tipoEvento = urlParams.get('tipoEvento');
+const [expertFirstName, expertLastName] = expertName.split(' ');
+const formData = JSON.parse(localStorage.getItem(`formData`)); 
+const formDataExpert = JSON.parse(localStorage.getItem(`paymentFormData-${expertName}`)); 
+
+const percentageServiceHours = ((formDataExpert.serviceDuration / formDataExpert.totalPaidHours) * 100).toFixed(0);
+const percentagePrepHours = ((formDataExpert.preparationTime / formDataExpert.totalPaidHours) * 100).toFixed(0);
+const percentageTravelCompensation = ((formDataExpert.travelCompensation / formDataExpert.totalPaidHours) * 100).toFixed(0);
 
 document.getElementById('exportPDFButton').addEventListener('click', async function () {
     const pdfBytes = await createPDF();
@@ -8,7 +14,7 @@ document.getElementById('exportPDFButton').addEventListener('click', async funct
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `FMV - ${expertName}.pdf`;
+    link.download = `FMV - ${expertFirstName} ${expertLastName}.pdf`;
 
     // Simula o clique no link para fazer o download
     link.click();
@@ -73,12 +79,12 @@ async function createPDF() {
     // Título e células da tabela
     const header = ['Service Information'];
     const content = [
-        ['Name of the requestor', 'Teste FIAP'],
-        ['Sanofi entity (DCV, Sanofi Genzyme, etc.)', 'Teste FIAP'],
-        ['Requestor Country', 'Teste FIAP'],
-        ['Project Title', 'Teste FIAP'],
-        ['Service Localization (Country)', 'Teste FIAP'],
-        ['Service Date', 'Teste FIAP'],
+        ['Name of the requestor', formData.nomeSolicitante || ''],
+        ['Sanofi entity (DCV, Sanofi Genzyme, etc.)', formData.unidade || ''],
+        ['Requestor Country', 'Brazil'],
+        ['Project Title', formData.nomeEvento || ''],
+        ['Service Localization', formData.localEvento || ''],
+        ['Service Date', formData.dataEvento || ''],
     ];
 
     page.drawRectangle({
@@ -159,23 +165,23 @@ async function createPDF() {
     // Título e células da tabela
     const header2 = ['Contract description'];
     const content2 = [
-        ['Expert Last Name', 'Teste FIAP'],
-        ['Expert First Name', expertName],
+        ['Expert Last Name', expertLastName || ''],
+        ['Expert First Name', expertFirstName || ''],
         ['Expert country of practice', 'Brazil'],
-        ['Service type', 'Symposium within the framework of a congress'],
-        ['Role', 'Speaker'],
-        ['Expert Level', 'Tier 1 Specialist'],
-        ['Hourly rate (BRL)', '1925'],
-        ['Hourly rate (USD)', '431'],
-        ['Duration of the service in hours', '5,00'],
-        ['Preparation time in hours', '5,00'],
-        ['Presentation type (new or not)', 'Teste FIAP'],
-        ['Number of preparatory conf-calls', 'Teste FIAP'],
-        ['Individual prep. time', 'Teste FIAP'],
-        ['Pre-reading required by Sanofi', 'Teste FIAP'],
-        ['On-site slide review', 'Teste FIAP'],
-        ['Speaker notes required by Sanofi', 'Teste FIAP'],
-        ['Travel time', '0 - 80 km / 0 - 50 miles'],
+        ['Service type', formDataExpert.serviceType || ''],
+        ['Role', formDataExpert.role || ''],
+        ['Expert Level', formDataExpert.expertLevel || ''],
+        ['Hourly rate (BRL)', formDataExpert.hourlyRateBRL || ''],
+        ['Hourly rate (USD)', formDataExpert.hourlyRateUSD || ''],
+        ['Duration of the service in hours', formDataExpert.serviceDuration || ''],
+        ['Preparation time in hours', formDataExpert.preparationTime || ''],
+        ['Presentation type (new or not)', formDataExpert.presentationType || ''],
+        ['Number of preparatory conf-calls', formDataExpert.confCallCount || ''],
+        ['Individual prep. time', formDataExpert.individualPrepTime || ''],
+        ['Pre-reading required by Sanofi', formDataExpert.preReadingRequired || ''],
+        ['On-site slide review', formDataExpert.onSiteSlideReview || ''],
+        ['Speaker notes required by Sanofi', formDataExpert.speakerNotesRequired || ''],
+        ['Travel time', formDataExpert.travelTime || ''],
     ];
 
     page.drawRectangle({
@@ -256,10 +262,11 @@ const numRows = 4; // Número de linhas
 // Cabeçalhos da nova tabela
 const headers3 = [
     'Total paid hours',
-    'Time for service in hours',
-    'Preparation time in hours',
+    'Time for service in hours', 
+    'Preparation time in hours', 
     'Travel time compensation in hours'
 ];
+
 
 // Cor de fundo dos cabeçalhos
 const headerColors3 = [
@@ -349,56 +356,56 @@ page.drawLine({
 
 
 // Textos do total paid hours
-page.drawText('Valor01', {
+page.drawText(formDataExpert.totalPaidHours || '', {
     x: 228,
     y: 401,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor02', {
+page.drawText('In % total', {
     x: 393,
     y: 401,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor03', {
+page.drawText(formDataExpert.serviceDuration || '', {
     x: 228,
     y: 383,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor04', {
+page.drawText(percentageServiceHours + '%', {
     x: 393,
     y: 383,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor05', {
+page.drawText(formDataExpert.preparationTime || '', {
     x: 228,
     y: 367,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor06', {
+page.drawText(percentagePrepHours + '%', {
     x: 393,
     y: 367,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor07', {
+page.drawText(formDataExpert.travelCompensation || '', {
     x: 228,
     y: 351,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor08', {
+page.drawText(percentageTravelCompensation + '%', {
     x: 393,
     y: 351,
     size: 9,
@@ -491,14 +498,14 @@ page.drawLine({
 });
 
 // Valores para o fee calculation
-page.drawText('Valor01fee', {
+page.drawText(formDataExpert.totalFeeBRL, {
     x: 228,
     y: 326,
     size: 9,
     color: rgb(0, 0, 0),
 });
 
-page.drawText('Valor02fee', {
+page.drawText(formDataExpert.totalFeeUSD, {
     x: 228,
     y: 309,
     size: 9,
