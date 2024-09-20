@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!todosOsParticipantes.has(nome)) {
             todosOsParticipantes.add(nome);
             atualizarParticipantesDisponiveis();
-            localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
+            sessionStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
         }
     }
 
@@ -72,8 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.log(`Participante "${nome}" não encontrado na lista.`);
             }
 
-            // Atualizar a lista de participantes no localStorage
-            localStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
+            // Atualizar a lista de participantes no sessionStorage
+            sessionStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
 
             // Atualizar a lista de participantes na página
             document.querySelectorAll('.participante').forEach(participanteDiv => {
@@ -93,11 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Verificar após a remoção
             console.log('Participantes após a remoção:', [...todosOsParticipantes]);
 
-            // Verificar localStorage
-            console.log('LocalStorage participantes:', JSON.parse(localStorage.getItem('participantes')));
+            // Verificar sessionStorage
+            console.log('sessionStorage participantes:', JSON.parse(sessionStorage.getItem('participantes')));
 
             // Remover o formulário de pagamento associado ao participante
-            localStorage.removeItem(`paymentFormData-${nome}`);
+            sessionStorage.removeItem(`paymentFormData-${nome}`);
         }
     }
 
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Carrega os participantes armazenados ao carregar a página
-    const participantesArmazenados = JSON.parse(localStorage.getItem('participantes')) || [];
+    const participantesArmazenados = JSON.parse(sessionStorage.getItem('participantes')) || [];
     participantesArmazenados.forEach(nome => {
         criarParticipanteDiv(nome);
     });
@@ -391,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'evento.pdf';
+        link.download = `${nomeEvento}.pdf`;
         link.click();
         URL.revokeObjectURL(url);
     }
@@ -422,11 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
             atividades
         };
 
-        localStorage.setItem('formData', JSON.stringify(formData));
+        sessionStorage.setItem('formData', JSON.stringify(formData));
     }
 
     function restoreData() {
-        const savedData = JSON.parse(localStorage.getItem('formData'));
+        const savedData = JSON.parse(sessionStorage.getItem('formData'));
         if (savedData) {
             document.getElementById('tipoEvento').value = savedData.tipoEvento;
             document.getElementById('nomeEvento').value = savedData.nomeEvento;
@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Função para limpar os dados do formulário e do localStorage
+    // Função para limpar os dados do formulário e do sessionStorage
     function resetForm() {
         if (confirm('Você tem certeza de que deseja resetar o formulário?')) {
             // Limpar dados do formulário
@@ -459,8 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // Limpar participantes
             document.getElementById('listaParticipantes').innerHTML = '';
 
-            // Remover dados do localStorage
-            localStorage.removeItem('formData');
+            // Remover dados do sessionStorage
+            sessionStorage.removeItem('formData');
         }
     }
 

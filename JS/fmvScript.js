@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Salvando o valor do dolar em uma constante
     getDolar();
 
-    // Restaurar dados do evento do localStorage
-    const savedEventData = JSON.parse(localStorage.getItem('formData'));
+    // Restaurar dados do evento do sessionStorage
+    const savedEventData = JSON.parse(sessionStorage.getItem('formData'));
 
     if (savedEventData) {
         document.getElementById('tipoEvento').value = savedEventData.tipoEvento;
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('comentariosObservacoes').disabled = true;
     }
 
-    // Restaurar nome e sobrenome do participante da URL ou localStorage
+    // Restaurar nome e sobrenome do participante da URL ou sessionStorage
     const urlParams = new URLSearchParams(window.location.search);
     const nomeParticipante = urlParams.get('expertName');
     
@@ -47,7 +47,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const participantId = urlParams.get('participantId');
 
 if (participantId) {
-    const participantes = JSON.parse(localStorage.getItem('participantes')) || [];
+    const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
     const participante = participantes.find(p => p.id === participantId);
 
     if (participante) {
@@ -74,7 +74,7 @@ function updateHourlyRateUSD() {
     document.getElementById('hourlyRateUSD').value = (valorReal * valorDolar).toFixed(2);
 }
 
-// Função para salvar os dados do formulário no localStorage
+// Função para salvar os dados do formulário no sessionStorage
 function saveData() {
     const form = document.getElementById('paymentForm');
     const formData = new FormData(form);
@@ -97,20 +97,32 @@ function saveData() {
     const nomeParticipante = urlParams.get('expertName'); // Pega o nome do participante da URL
     if (nomeParticipante) {
         // Armazena os dados do formulário para o participante específico
-        localStorage.setItem(`paymentFormData-${nomeParticipante}`, JSON.stringify(data));
+        sessionStorage.setItem(`paymentFormData-${nomeParticipante}`, JSON.stringify(data));
     }
 }
+
+function monitorFormChanges() {
+    const form = document.getElementById('paymentForm');
+    
+    // Adiciona listeners a todos os campos do formulário
+    Array.from(form.elements).forEach(element => {
+        element.addEventListener('input', saveData);  // Para campos de texto, número e outros que disparam 'input'
+        element.addEventListener('change', saveData); // Para selects, checkboxes e radios que disparam 'change'
+    });
+}
+
+// Chamar a função de monitoramento quando a página carregar
+document.addEventListener('DOMContentLoaded', monitorFormChanges);
+
 
 // Salva os dados do formulário antes de enviar
 document.getElementById('paymentForm').addEventListener('submit', saveData);
 
-
-
-// Função para restaurar os dados do formulário a partir do localStorage
+// Função para restaurar os dados do formulário a partir do sessionStorage
 function restoreData() {
     const nomeParticipante = urlParams.get('expertName'); // Pega o nome do participante da URL
     if (nomeParticipante) {
-        const savedData = localStorage.getItem(`paymentFormData-${nomeParticipante}`);
+        const savedData = sessionStorage.getItem(`paymentFormData-${nomeParticipante}`);
 
         if (savedData) {
             const data = JSON.parse(savedData);
@@ -170,10 +182,10 @@ function resetForm() {
         document.getElementById('totalFeeBRL').value = '';
         document.getElementById('totalFeeUSD').value = '';
 
-        // Remove dados do localStorage para o participante atual
+        // Remove dados do sessionStorage para o participante atual
         const nomeParticipante = urlParams.get('expertName');
         if (nomeParticipante) {
-            localStorage.removeItem(`paymentFormData-${nomeParticipante}`);
+            sessionStorage.removeItem(`paymentFormData-${nomeParticipante}`);
         }
     }
 }

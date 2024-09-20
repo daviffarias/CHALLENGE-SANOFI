@@ -1,14 +1,14 @@
-const expertName = urlParams.get('expertName');
-const [expertFirstName, expertLastName] = expertName.split(' ');
-const formData = JSON.parse(localStorage.getItem(`formData`)); 
-const formDataExpert = JSON.parse(localStorage.getItem(`paymentFormData-${expertName}`)); 
-
-const percentageServiceHours = ((formDataExpert.serviceDuration / formDataExpert.totalPaidHours) * 100).toFixed(0);
-const percentagePrepHours = ((formDataExpert.preparationTime / formDataExpert.totalPaidHours) * 100).toFixed(0);
-const percentageTravelCompensation = ((formDataExpert.travelCompensation / formDataExpert.totalPaidHours) * 100).toFixed(0);
-
 document.getElementById('exportPDFButton').addEventListener('click', async function () {
-    const pdfBytes = await createPDF();
+    // Recarregar dados mais recentes do sessionStorage
+    const expertName = urlParams.get('expertName');
+    const [expertFirstName, expertLastName] = expertName.split(' ');
+    
+    // Recarregar os dados do sessionStorage antes de gerar o PDF
+    const formData = JSON.parse(sessionStorage.getItem(`formData`)); 
+    const formDataExpert = JSON.parse(sessionStorage.getItem(`paymentFormData-${expertName}`));
+
+    // Agora crie o PDF com os dados mais recentes
+    const pdfBytes = await createPDF(formData, formDataExpert, expertFirstName, expertLastName);
 
     // Cria um Blob para download
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -20,7 +20,12 @@ document.getElementById('exportPDFButton').addEventListener('click', async funct
     link.click();
 });
 
-async function createPDF() {
+async function createPDF(formData, formDataExpert, expertFirstName, expertLastName) {
+
+    const percentageServiceHours = ((formDataExpert.serviceDuration / formDataExpert.totalPaidHours) * 100).toFixed(0);
+    const percentagePrepHours = ((formDataExpert.preparationTime / formDataExpert.totalPaidHours) * 100).toFixed(0);
+    const percentageTravelCompensation = ((formDataExpert.travelCompensation / formDataExpert.totalPaidHours) * 100).toFixed(0);
+
     const { PDFDocument, rgb, StandardFonts, fontBold } = PDFLib;
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([600, 850]);
@@ -547,7 +552,7 @@ page.drawLine({
 
 // Caixa adicional texto
 
-page.drawText('Additional Information and / or justifications', {
+page.drawText(formDataExpert.additionalInfo, {
     x: 52,
     y: 281.5,
     size: 8,
@@ -569,8 +574,6 @@ page.drawText('DD/MM/AAAA', {
     size: 7,
     color: rgb(0, 0, 0),
 });
-
-
 
     // Salvar o PDF
     const pdfBytes = await pdfDoc.save();
