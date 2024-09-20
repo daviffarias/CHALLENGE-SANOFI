@@ -5,6 +5,11 @@
 ## Status
 
 - O autocomplete já está funcionando para os inputs necessários.
+- O sistema de login admin está funcionando para controlar variáveis globais (tabela users)
+- O PDF de pagamento está estilizado
+- **FALTA ESTILIZAR O PDF GERAL**
+- **FALTA USAR AS VARIÁVEIS GLOBAIS NO JAVASCRIPT**
+  
 
 ## Adicionar autocomplete
 
@@ -24,9 +29,9 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [ ] Personalizar o PDF com alguma biblioteca javascript & Validar se todos os campos estão refletidos no PDF
 - [x] Modelar o banco de dados para ter colunas para cada campo que terá autocomplete  
 - [x] Atualizar os campos que estão faltantes do FMV novo  
-- [ ] Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
+- [x] Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
 **Ex:** valorTaxaKm = 5  
-- [ ] Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial  
+- [x] Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial  
 - [x] Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador
 - [x] Tempo de Viagem: Colocar o calculo do pagamento de acordo com as faixas de km de deslocamento  
 - [x] Ajustar espelhamento da Agenda -> FMV
@@ -43,4 +48,5 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] Quando eu preencho todo o formulário de pagamento de algum participante, o que eu já tinha preenchido no formulário do evento some  
 - [x] Atualmente os participantes da agenda só podem participar de uma atividade. Segundo a regra da Sanofi, eles podem participar de várias atividades dentro de um evento/agenda  
 - [x] O botão de baixar dados combinados (pdf) as vezes não funciona, não consegui identificar o motivo  
-- [ ] Os dados de participantes e agendas ficam salvos mesmo depois de preencher e enviar (talvez culpa do localStorage, sessionStorage pode resolver)  
+- [ ] Os dados de participantes e agendas ficam salvos mesmo depois de preencher e enviar (talvez culpa do localStorage, sessionStorage pode resolver)
+- [ ] O botão de atualizar as variáveis globais retorna que atualizou, mas não funciona  
