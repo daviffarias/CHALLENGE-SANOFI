@@ -1,17 +1,19 @@
-document.getElementById('botaoSacrificio').addEventListener('click', async function () {
-    const pdfBytes = await createPDF();
+document.getElementById('downloadPDF').addEventListener('click', async function () {
+    // Recarregar os dados do sessionStorage antes de gerar o PDF
+    const formData = JSON.parse(sessionStorage.getItem(`formData`));
 
     // Cria um Blob para download
+    const pdfBytes = await createPDF(formData);
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `Dados_combinados.pdf`;
+    link.download = `Dados Agenda - ${formData.nomeEvento}.pdf`;
 
     // Simula o clique no link para fazer o download
     link.click();
 });
 
-async function createPDF() {
+async function createPDF(formData) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([600, 900]);
@@ -38,7 +40,7 @@ async function createPDF() {
     const gapColunaVertical = 15;
 
     // Nome do Evento
-    page.drawText('Nome do evento', {
+    page.drawText(formData.nomeEvento, {
         x: inicioX,
         y: inicioY,
         size: titulo,
@@ -47,7 +49,7 @@ async function createPDF() {
     });
 
     // Subtítulo evento
-    page.drawText('Scientific meeting / Endereço OU Virtual', {
+    page.drawText(formData.tipoEvento+' / '+formData.localEvento, {
         x: inicioX,
         y: inicioY - gapTexto,
         size: subtitulo,
