@@ -1,9 +1,16 @@
 document.getElementById('downloadPDF').addEventListener('click', async function () {
     // Recarregar os dados do sessionStorage antes de gerar o PDF
     const formData = JSON.parse(sessionStorage.getItem(`formData`));
+    const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
+    const tipos = participantes.map(participante => participante.tipo);
+    const nomeParticipantes = participantes.map(participante => participante.nome);
+    const atividades = formData.map(atividade => atividade.descricao);
+    const salaLink = formData.map(atividade => atividade.salaLink);
+    const listaPalestrantes = formData.map(atividade => atividade.palestrantes);
+    const outrosParticipantes = formData.map(atividade => atividade.outrosParticipantes);
 
     // Cria um Blob para download
-    const pdfBytes = await createPDF(formData);
+    const pdfBytes = await createPDF(formData,participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes);
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -13,7 +20,8 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
     link.click();
 });
 
-async function createPDF(formData) {
+
+async function createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([600, 900]);
@@ -101,8 +109,8 @@ async function createPDF(formData) {
     });
 
     // Loop que pega array de participantes e insere o quanto precisar
-    var Perfil = ['Staff Sanofi', 'Expert externo / HCP', 'Expert externo / HCP', 'Expert externo / HCP', 'Expert externo / HCP',];
-    var Participante = ['Colaborador SANOFI', 'Colocar o nome do participante 01', 'Colocar o nome do participante 02', 'Colocar o nome do participante 03', 'XXXXXXX'];
+    var Perfil = tipos;
+    var Participante = nomeParticipantes;
 
     var i = 1;
     var ultimoY = 0;
@@ -144,13 +152,12 @@ async function createPDF(formData) {
         font: boldFont,
     });
 
-
     // Loop que pega a quantidade de atividades agendadas e monta no pdf
 
     // Obs: siga a ordem do primeiro ao último, se algum campo for vazio, coloque uma string vazia na lista ''
-    var tituloAtividade = ['Palestra 01', 'Palestra 02', 'Palestra 03', 'Coffee break (ou Almoço)', 'Q&A'];
-    var nomeOuLinkPalestra = ['Incluir nome/numero da sala ou link virtual', 'Incluir nome/numero da sala ou link virtual', 'Incluir nome/numero da sala ou link virtual', 'Restaurante', 'Incluir nome/numero da sala ou link virtual'];
-    var palestrantes = ['Palestrante 01', 'Palestrante 02', 'Palestrante 03', '', 'Staff Sanofi'];
+    var tituloAtividade = atividades;
+    var nomeOuLinkPalestra = salaLink;
+    var palestrantes = [listaPalestrantes, outrosParticipantes];
 
     // Variável de referência para a altura
     let alturaAtual = ultimoY - 4 * gapColunaVertical;
