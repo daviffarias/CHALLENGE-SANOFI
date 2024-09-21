@@ -1,11 +1,12 @@
 document.getElementById('exportPDFButton').addEventListener('click', async function () {
     // Recarregar dados mais recentes do sessionStorage
     const expertName = urlParams.get('expertName');
+    const participantId = urlParams.get('participantId');
     const [expertFirstName, expertLastName] = expertName.split(' ');
     
     // Recarregar os dados do sessionStorage antes de gerar o PDF
     const formData = JSON.parse(sessionStorage.getItem(`formData`)); 
-    const formDataExpert = JSON.parse(sessionStorage.getItem(`paymentFormData-${expertName}`));
+    const formDataExpert = JSON.parse(sessionStorage.getItem(`paymentFormData-${participantId}`));
 
     // Agora crie o PDF com os dados mais recentes
     const pdfBytes = await createPDF(formData, formDataExpert, expertFirstName, expertLastName);
@@ -568,7 +569,10 @@ page.drawText('PDF gerado por FormEase - FusionTech', {
     color: rgb(0, 0, 0),
 });
 
-page.drawText('DD/MM/AAAA', {
+const hoje = new Date();
+const dataHoraFormatada = hoje.toLocaleString('pt-BR');
+
+page.drawText(dataHoraFormatada, {
     x: 291,
     y: 16,
     size: 7,

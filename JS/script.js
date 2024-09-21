@@ -1,38 +1,27 @@
-let todosOsParticipantes = new Set();
+let todosOsParticipantes = new Map();
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('eventForm');
     const downloadButton = document.getElementById('downloadPDF');
     const participantesSelects = [];
 
     function atualizarParticipantesDisponiveis() {
-        const participantes = new Set();
-        document.querySelectorAll('.participante').forEach(participanteDiv => {
-            const nome = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
-            if (nome) {
-                participantes.add(nome);
-            }
-        });
-
-        // Atualize a variável global todosOsParticipantes
-        todosOsParticipantes = new Set(participantes);
         participantesSelects.forEach(select => {
             const currentSelected = new Set(select.getValue(true));
-            const updatedChoices = Array.from(todosOsParticipantes).map(nome => ({
-                value: nome,
+            const updatedChoices = Array.from(todosOsParticipantes.entries()).map(([id, nome]) => ({
+                value: id,
                 label: nome,
-                selected: currentSelected.has(nome),
+                selected: currentSelected.has(id),
             }));
             select.clearStore();
             select.setChoices(updatedChoices, 'value', 'label', false);
-
-            currentSelected.forEach(nome => {
-                if (todosOsParticipantes.has(nome)) {
-                    select.setChoiceByValue(nome);
+    
+            currentSelected.forEach(id => {
+                if (todosOsParticipantes.has(id)) {
+                    select.setChoiceByValue(id);
                 }
             });
         });
     }
-
 
     function atualizarParticipantesNoFormulario(selectModificado) {
         const valorSelecionado = selectModificado.getValue(true);
@@ -50,121 +39,131 @@ document.addEventListener('DOMContentLoaded', () => {
         atualizarParticipantesDisponiveis();
     }
 
-    function adicionarParticipante(nome) {
-        if (!todosOsParticipantes.has(nome)) {
-            todosOsParticipantes.add(nome);
+    function adicionarParticipante(id, nome) {
+        if (!todosOsParticipantes.has(id)) {
+            todosOsParticipantes.set(id, nome);
             atualizarParticipantesDisponiveis();
-            sessionStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
+            salvarParticipantesNoSessionStorage();
         }
+    }
+    function salvarParticipantesNoSessionStorage() {
+        const participantesArray = Array.from(todosOsParticipantes, ([id, nome]) => ({ id, nome }));
+        sessionStorage.setItem('participantes', JSON.stringify(participantesArray));
     }
 
     // Função para remover um participante
-    function removerParticipante(nome) {
+    function removerParticipante(id) {
+        const nome = todosOsParticipantes.get(id);
         const confirmar = confirm(`Você tem certeza de que deseja excluir todos os dados do participante "${nome}"? Esta ação não pode ser desfeita.`);
-
+    
         if (confirmar) {
-
-            // Verificar se o nome está no Set antes de tentar remover
-            if (todosOsParticipantes.has(nome)) {
-                todosOsParticipantes.delete(nome);
+            if (todosOsParticipantes.has(id)) {
+                todosOsParticipantes.delete(id);
                 console.log(`Participante "${nome}" removido.`);
             } else {
-                console.log(`Participante "${nome}" não encontrado na lista.`);
+                console.log(`Participante com ID "${id}" não encontrado na lista.`);
             }
-
-            // Atualizar a lista de participantes no sessionStorage
-            sessionStorage.setItem('participantes', JSON.stringify([...todosOsParticipantes]));
-
-            // Atualizar a lista de participantes na página
+    
+            salvarParticipantesNoSessionStorage();
+    
             document.querySelectorAll('.participante').forEach(participanteDiv => {
-                const nomeParticipante = participanteDiv.querySelector('input[name="nomeParticipante"]').value.trim();
-                if (nomeParticipante === nome) {
+                const participanteId = participanteDiv.querySelector('input[name="participanteId"]').value;
+                if (participanteId === id) {
                     participanteDiv.remove();
                 }
             });
-
-            // Atualizar select boxes
-            participantesSelects.forEach(select => {
-                select.removeActiveItemsByValue(nome);
-            });
-
+    
             atualizarParticipantesDisponiveis();
-
-            // Verificar após a remoção
-            console.log('Participantes após a remoção:', [...todosOsParticipantes]);
-
-            // Verificar sessionStorage
-            console.log('sessionStorage participantes:', JSON.parse(sessionStorage.getItem('participantes')));
-
+    
             // Remover o formulário de pagamento associado ao participante
-            sessionStorage.removeItem(`paymentFormData-${nome}`);
+            sessionStorage.removeItem(`paymentFormData-${id}`);
         }
     }
 
+    function generateUniqueId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
 
-    // Função para criar um div de participante
-    function criarParticipanteDiv(nome = '', tipo = 'expert') {
+    function criarParticipanteDiv(nome = '', tipo = 'expert', id = null) {
         const participanteDiv = document.createElement('div');
         participanteDiv.classList.add('participante');
-
+        
+        // Gerar um novo ID se não for fornecido
+        const participanteId = id || generateUniqueId();
+        
         participanteDiv.innerHTML = `
-        <label for="nomeParticipante">Nome:</label>
-        <input type="text" name="nomeParticipante" value="${nome}" autocomplete='off'>
-        <label for="tipoParticipante">Tipo:</label>
-        <select name="tipoParticipante">
-            <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
-            <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
-        </select>
-        <button type="button" class="removerParticipante">Remover Participante</button>
-        <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
-    `;
-
+            <input type="hidden" name="participanteId" value="${participanteId}">
+            <label for="nomeParticipante">Nome:</label>
+            <input type="text" name="nomeParticipante" value="${nome}" autocomplete='off'>
+            <label for="tipoParticipante">Tipo:</label>
+            <select name="tipoParticipante">
+                <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
+                <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
+            </select>
+            <button type="button" class="removerParticipante">Remover Participante</button>
+            <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
+        `;
+        
         const nomeInput = participanteDiv.querySelector('input[name="nomeParticipante"]');
         const tipoSelect = participanteDiv.querySelector('select[name="tipoParticipante"]');
         const abrirFormularioBtn = participanteDiv.querySelector('.abrirFormulario');
-
+    
         // Função para atualizar o estado do botão
         function verificarCondicoes() {
             const nome = nomeInput.value.trim();
             const tipo = tipoSelect.value;
             abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
         }
-
+    
+        // Atualizar o nome no sessionStorage quando o valor for alterado
+        nomeInput.addEventListener('input', () => {
+            const novoNome = nomeInput.value.trim();
+            if (novoNome) {
+                // Atualiza o nome do participante no sessionStorage
+                const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
+                const participanteIndex = participantes.findIndex(p => p.id === participanteId);
+    
+                if (participanteIndex !== -1) {
+                    participantes[participanteIndex].nome = novoNome;
+                    sessionStorage.setItem('participantes', JSON.stringify(participantes));
+                }
+            }
+    
+            verificarCondicoes();
+        });
+    
         // Configurar eventos
         nomeInput.addEventListener('blur', () => {
             const nome = nomeInput.value.trim();
             if (nome) {
-                adicionarParticipante(nome);
+                adicionarParticipante(participanteId, nome);
             }
             verificarCondicoes();
         });
-
+        
         tipoSelect.addEventListener('change', verificarCondicoes);
-
+    
         abrirFormularioBtn.addEventListener('click', () => {
             const nome = nomeInput.value.trim();
             if (nome) {
-                window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}`;
+                window.location.href = `payment-form.html?expertName=${encodeURIComponent(nome)}&participantId=${participanteId}`;
             }
         });
-
-
+    
         participanteDiv.querySelector('.removerParticipante').addEventListener('click', () => {
-            const nome = nomeInput.value.trim();
-            if (nome) {
-                removerParticipante(nome);
-                participanteDiv.remove();
-            }
+            removerParticipante(participanteId);
         });
-
+    
         verificarCondicoes();
         document.getElementById('listaParticipantes').appendChild(participanteDiv);
     }
+    
 
     // Carrega os participantes armazenados ao carregar a página
     const participantesArmazenados = JSON.parse(sessionStorage.getItem('participantes')) || [];
-    participantesArmazenados.forEach(nome => {
-        criarParticipanteDiv(nome);
+    participantesArmazenados.forEach(({ id, nome }) => {
+        todosOsParticipantes.set(id, nome);
+        criarParticipanteDiv(nome, 'expert', id);
     });
 
     document.getElementById('adicionarParticipante').addEventListener('click', () => {

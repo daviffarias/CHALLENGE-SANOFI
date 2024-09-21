@@ -48,4 +48,4 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] O botão de baixar dados combinados (pdf) as vezes não funciona, não consegui identificar o motivo  
 - [x] Os dados de participantes e agendas ficam salvos mesmo depois de preencher e enviar (talvez culpa do localStorage, sessionStorage pode resolver)
 - [ ] O botão de atualizar as variáveis globais retorna que atualizou, mas não funciona  
-- [ ] Ao alterar o nome do participante, ele cria um novo FMV. Talvez associar o FMV a um ID invés de nome
+- [x] Ao alterar o nome do participante, ele cria um novo FMV. Talvez associar o FMV a um ID invés de nome

@@ -29,8 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Restaurar nome e sobrenome do participante da URL ou sessionStorage
     const urlParams = new URLSearchParams(window.location.search);
     const nomeParticipante = urlParams.get('expertName');
+    const participantId = urlParams.get('participantId');
     
-    if (nomeParticipante) {
+    if (nomeParticipante && participantId) {
         const [nome, sobrenome] = nomeParticipante.split(' ');
         document.getElementById('expertFirstName').value = nome;
         document.getElementById('expertLastName').value = sobrenome;
@@ -51,10 +52,21 @@ if (participantId) {
     const participante = participantes.find(p => p.id === participantId);
 
     if (participante) {
-        document.getElementById('nomeParticipante').value = participante.nome;
-        document.getElementById('tipoParticipante').value = participante.tipo;
+        const nomeParticipanteElem = document.getElementById('nomeParticipante');
+        const tipoParticipanteElem = document.getElementById('tipoParticipante');
+
+        // Verificar se os elementos existem antes de definir os valores
+        if (nomeParticipanteElem) {
+            nomeParticipanteElem.value = participante.nome;
+        }
+        if (tipoParticipanteElem) {
+            tipoParticipanteElem.value = participante.tipo;
+        }
+    } else {
+        console.warn(`Participante com ID "${participantId}" não encontrado.`);
     }
 }
+
 
 // Função para salvar o valor do dolar em uma constante
 function getDolar() {
@@ -94,10 +106,11 @@ function saveData() {
     data.totalFeeBRL = document.getElementById('totalFeeBRL').value;
     data.totalFeeUSD = document.getElementById('totalFeeUSD').value;
 
-    const nomeParticipante = urlParams.get('expertName'); // Pega o nome do participante da URL
-    if (nomeParticipante) {
-        // Armazena os dados do formulário para o participante específico
-        sessionStorage.setItem(`paymentFormData-${nomeParticipante}`, JSON.stringify(data));
+    const urlParams = new URLSearchParams(window.location.search);
+    const participantId = urlParams.get('participantId');
+    if (participantId) {
+        // Armazena os dados do formulário para o participante específico usando o ID
+        sessionStorage.setItem(`paymentFormData-${participantId}`, JSON.stringify(data));
     }
 }
 
@@ -114,15 +127,15 @@ function monitorFormChanges() {
 // Chamar a função de monitoramento quando a página carregar
 document.addEventListener('DOMContentLoaded', monitorFormChanges);
 
-
 // Salva os dados do formulário antes de enviar
 document.getElementById('paymentForm').addEventListener('submit', saveData);
 
 // Função para restaurar os dados do formulário a partir do sessionStorage
 function restoreData() {
-    const nomeParticipante = urlParams.get('expertName'); // Pega o nome do participante da URL
-    if (nomeParticipante) {
-        const savedData = sessionStorage.getItem(`paymentFormData-${nomeParticipante}`);
+    const urlParams = new URLSearchParams(window.location.search);
+    const participantId = urlParams.get('participantId');
+    if (participantId) {
+        const savedData = sessionStorage.getItem(`paymentFormData-${participantId}`);
 
         if (savedData) {
             const data = JSON.parse(savedData);
