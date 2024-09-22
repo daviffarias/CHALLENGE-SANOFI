@@ -17,9 +17,71 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
     );
     
     const outrosParticipantes = formData.atividades.map(atividade => atividade.outrosParticipantes);
+    const dataAtividade = formData.atividades.map(atividade => atividade.data);
+    console.log('Data da atividade:', dataAtividade);
+
+    const horasRefeicoes = [];
+    const horasPagaveis = [];
+    const horasParticipacaoAtiva = [];
+    const horasTotais = []; // New array for total hours
+    
+    console.log('Número de participantes:', participantes.length);
+    console.log('Número de atividades:', formData.atividades.length);
+    
+    function calculateDuration(timeInit, timeEnd) {
+        const start = new Date(`1970-01-01T${timeInit}:00`);
+        const end = new Date(`1970-01-01T${timeEnd}:00`);
+        return (end - start) / 3600000; // Convert milliseconds to hours
+    }
+    
+    participantes.forEach(participante => {
+        let totalHorasRefeicoes = 0;
+        let totalHorasPagaveis = 0;
+        let totalHorasParticipacaoAtiva = 0;
+    
+        console.log('Processando participante:', participante.id);
+    
+        formData.atividades.forEach(atividade => {
+            const duracao = calculateDuration(atividade.timeInit, atividade.timeEnd);
+            console.log('Atividade:', atividade.descricao, 'Duração:', duracao);
+    
+            if (atividade.teveRefeicao) {
+                totalHorasRefeicoes += duracao;
+                console.log('Refeição');
+            } else if (atividade.palestrantes.includes(participante.id)) {
+                totalHorasPagaveis += duracao;
+                console.log('Palestrante');
+            } else if (atividade.outrosParticipantes.includes(participante.id)) {
+                totalHorasParticipacaoAtiva += duracao;
+                console.log('Participação Ativa');
+            } else {
+                console.log('Participante não envolvido nesta atividade');
+            }
+        });
+    
+        const totalHoras = totalHorasRefeicoes + totalHorasPagaveis + totalHorasParticipacaoAtiva;
+    
+        console.log('Totais para participante', participante.id, ':', 
+                    'Refeições:', totalHorasRefeicoes, 
+                    'Pagáveis:', totalHorasPagaveis, 
+                    'Participação Ativa:', totalHorasParticipacaoAtiva,
+                    'Total:', totalHoras);
+    
+        horasRefeicoes.push(totalHorasRefeicoes.toFixed(2));
+        horasPagaveis.push(totalHorasPagaveis.toFixed(2));
+        horasParticipacaoAtiva.push(totalHorasParticipacaoAtiva.toFixed(2));
+        horasTotais.push(totalHoras.toFixed(2)); // Add total hours to the new array
+    });
+    
+    console.log('Resultados finais:');
+    console.log('Horas Refeições:', horasRefeicoes);
+    console.log('Horas Pagáveis:', horasPagaveis);
+    console.log('Horas Participação Ativa:', horasParticipacaoAtiva);
+    console.log('Horas Totais:', horasTotais);
 
     // Geração do PDF
-    const pdfBytes = await createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes);
+    const pdfBytes = await createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
+        outrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade);
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -28,7 +90,8 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
 });
 
 
-async function createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes) {
+async function createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
+    outrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([600, 900]);
@@ -331,11 +394,6 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
         font: boldFont,
     });
 
-    // Loops que iteram pelos arrays de horas
-    var horasRefeicoes = ['0,00', '0,00', '0,00', '0,00', '0,00'];
-    var horasPagaveis = ['0,50', '0,50', '2,00', '0,00', '0,00'];
-    var horasParticipacaoAtiva = ['0,00', '1,50', '1,00', '2,00', '0,00'];
-
     var alturaAtual2 = 0;
     var i = 1;
     var ultimoY = 0;
@@ -383,13 +441,17 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
     }
 
     // Loop das datas e horários
-    var data = '30/07/2022';
-    var horário = ['09:00 a 10:00', '10:00 a 11:00', '11:00 a 11:30', '11:30 a 12:00', '11:30 a 12:00'];
-    var participantes = [['Colocar nomedo participante 03 (Expert externo / HCP)', 'Colocar o nome do participante 02 (Expert externo / HCP)'], [''], ['Colocar nomedo participante 03 (Expert externo / HCP)', 'Colocar o nome do participante 01 (Expert externo / HCP)', 'Colocar o nome do participante 02 (Expert externo / HCP)'], ['Colocar nomedo participante 03 (Expert externo / HCP)', 'Colocar o nome do participante 01 (Expert externo / HCP)', 'Colocar o nome do participante 02 (Expert externo / HCP)'], ['Colocar o nome do participante 01 (Expert externo / HCP)', 'Colocar o nome do participante 02 (Expert externo / HCP)']]; // Cuidado, isso aqui é um array de arrays
+    const data = dataAtividade; // Lista de datas das atividades
+    const horarios = formData.atividades.map(atividade => `${atividade.timeInit} - ${atividade.timeEnd}`); // Pega o horário de início e fim
+    const participantesAtividade = formData.atividades.map(atividade => atividade.outrosParticipantes); // Mapeia os participantes
+
     for (let k = 0; k < tituloAtividade.length; k++) {
-        var data = data;
-        var horario = horário[k];
-        var participante = participantes[k] || [''];
+        const dataAtual = data[k] || '';
+        const horarioAtual = horarios[k] || '';
+        const participantesAtuais = participantesAtividade[k].map(idParticipante => {
+            const participante = participantes.find(p => p.id === idParticipante);
+            return participante ? participante.nome : 'Participante não encontrado';
+        }).join(', '); // Junta os participantes em uma string
 
         try {
             // Retângulo Atividade
@@ -415,7 +477,7 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
             alturaAtual2 -= 15; // Atualiza altura para o próximo item
 
             // Texto palestra
-            page2.drawText(data, {
+            page2.drawText(dataAtual, {
                 x: ((inicioX + 3) + 220) + gapColunaHorizontal + 3,
                 y: alturaAtual2 + 34,
                 size: subtitulo,
@@ -426,7 +488,7 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
             alturaAtual2 -= 15; // Atualiza altura para o próximo item
 
             // Texto nome ou link
-            page2.drawText(horario, {
+            page2.drawText(horarioAtual, {
                 x: ((inicioX + 3) + 220) + gapColunaHorizontal + 3,
                 y: alturaAtual2 + 34,
                 size: subtitulo,
@@ -437,7 +499,7 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
             alturaAtual2 -= 15; // Atualiza altura para o próximo item
 
             // Texto palestrantes
-            page2.drawText('Participantes', {
+            page2.drawText(`Participantes:`, {
                 x: inicioX + 3,
                 y: (alturaAtual2 - gapTexto) + 50,
                 size: subtitulo,
@@ -446,19 +508,17 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
             });
 
             alturaAtual2 -= (gapTexto + 1.8 * gapTexto); // Atualiza altura
-
             // Texto nome do palestrante com quebras de linha
-            participante.forEach((p, index) => {
-                page2.drawText(p, {
+                page2.drawText(participantesAtuais, {
                     x: inicioX + 3,
-                    y: (alturaAtual2) + 70 - index * 15, // Ajusta a posição vertical para cada participante
+                    y: (alturaAtual2) + 70 - k * 20, // Ajusta a posição vertical para cada participante
                     size: texto,
                     color: preto,
                     font: regularFont,
                 });
-            });
 
-            alturaAtual2 -= (gapTexto - 60 + participante.length * 15); // Atualiza altura com base no número de participantes
+
+            alturaAtual2 -= (gapTexto - 60 + participantesAtuais.length * 15); // Atualiza altura com base no número de participantes
         } catch (error) {
             console.error(error);
             // Caso ocorra um erro, utiliza string vazia
@@ -505,9 +565,8 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
         font: boldFont,
     });
 
-    var totalDeHoras = ['0,50', '2,00', '3,00', '2,00', '0,00'];
     var i = 0;
-    for (totalHoras of totalDeHoras) {
+    for (totalHoras of horasTotais) {
             page3.drawText(totalHoras, {
                 x: inicioX + 5,
                 y: ((((inicioY - 2 * gapTexto - gapColunaVertical) - 10) - 7) - 27) - 0.75*gapTexto*i,
