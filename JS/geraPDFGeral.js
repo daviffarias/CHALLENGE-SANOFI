@@ -1,4 +1,10 @@
 document.getElementById('downloadPDF').addEventListener('click', async function () {
+
+    if (!validateFormFields()) {
+        alert('Por favor, preencha todos os campos obrigatórios antes de gerar o PDF.');
+        return; // Interrompe a execução se a validação falhar
+    }
+
     const formData = JSON.parse(sessionStorage.getItem('formData')) || { atividades: [] };
     const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
     
@@ -15,8 +21,14 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
             return palestrante ? palestrante.nome : 'Palestrante não encontrado';
         }).join(', ')  // Junta os nomes dos palestrantes em uma string separada por vírgula
     );
+
+    const listaOutrosParticipantes = formData.atividades.map(atividade =>
+        atividade.outrosParticipantes.map(idParticipante => {
+            const participante = participantes.find(p => p.id === idParticipante);
+            return participante ? participante.nome : 'Participante não encontrado';
+        })
+    );
     
-    const outrosParticipantes = formData.atividades.map(atividade => atividade.outrosParticipantes);
     const dataAtividade = formData.atividades.map(atividade => atividade.data);
     console.log('Data da atividade:', dataAtividade);
 
@@ -29,9 +41,25 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
     console.log('Número de atividades:', formData.atividades.length);
     
     function calculateDuration(timeInit, timeEnd) {
+        // Verificar se timeInit ou timeEnd são vazios
+        if (!timeInit || !timeEnd) {
+            console.error('Os horários de início e fim devem ser fornecidos.');
+            return 0; // Retorna 0 ou outro valor padrão para indicar duração inválida
+        }
+    
         const start = new Date(`1970-01-01T${timeInit}:00`);
         const end = new Date(`1970-01-01T${timeEnd}:00`);
-        return (end - start) / 3600000; // Convert milliseconds to hours
+    
+        // Calcular duração e garantir que o valor seja positivo
+        const duration = (end - start) / 3600000; // Convertendo de milissegundos para horas
+    
+        // Verificar se a duração é negativa
+        if (duration < 0) {
+            console.error('O horário de início deve ser anterior ao horário de fim.');
+            return 0; // Retorna 0 para indicar uma duração inválida
+        }
+    
+        return duration;
     }
     
     participantes.forEach(participante => {
@@ -72,26 +100,184 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
         horasParticipacaoAtiva.push(totalHorasParticipacaoAtiva.toFixed(2));
         horasTotais.push(totalHoras.toFixed(2)); // Add total hours to the new array
     });
-    
-    console.log('Resultados finais:');
-    console.log('Horas Refeições:', horasRefeicoes);
-    console.log('Horas Pagáveis:', horasPagaveis);
-    console.log('Horas Participação Ativa:', horasParticipacaoAtiva);
-    console.log('Horas Totais:', horasTotais);
 
-    // Geração do PDF
-    const pdfBytes = await createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
-        outrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade);
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Dados Agenda - ${formData.nomeEvento}.pdf`;
-    link.click();
+    const timeInit = formData.atividades.map(atividade => atividade.timeInit);
+    const timeEnd = formData.atividades.map(atividade => atividade.timeEnd);
+
+    // Geração do PDF Horizontal
+    const pdfBytesHoriz = await createPDFHoriz(
+        formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
+        listaOutrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade, timeInit, timeEnd
+    );
+
+    // Geração do PDF Vertical
+    const pdfBytesVert = await createPDFVertic(
+        formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
+        listaOutrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade, timeInit, timeEnd
+    );
+
+    // Criação dos Blobs para os dois PDFs
+    const blobHoriz = new Blob([pdfBytesHoriz], { type: 'application/pdf' });
+    const blobVert = new Blob([pdfBytesVert], { type: 'application/pdf' });
+
+    // Criação dos Links para Download
+    const linkHoriz = document.createElement('a');
+    linkHoriz.href = URL.createObjectURL(blobHoriz);
+    linkHoriz.download = `Dados Agenda - ${formData.nomeEvento} - Horizontal.pdf`;
+
+    const linkVert = document.createElement('a');
+    linkVert.href = URL.createObjectURL(blobVert);
+    linkVert.download = `Dados Agenda - ${formData.nomeEvento} - Vertical.pdf`;
+
+    // Disparo dos Downloads
+    linkHoriz.click();
+    linkVert.click();
 });
 
 
-async function createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
-    outrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade) {
+async function createPDFHoriz(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
+    listaOutrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade, timeInit, timeEnd) {
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+    const pageSize = [841.89, 595.28]; // A4 landscape
+    let page = pdfDoc.addPage(pageSize); // Adiciona a primeira página
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const regularFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+    // Colors
+    const purple = rgb(0.8, 0.7, 0.9);
+    const darkPurple = rgb(0.5, 0.4, 0.7);
+    const black = rgb(0, 0, 0);
+
+    // Text sizes
+    const titleSize = 16;
+    const subtitleSize = 12;
+    const normalSize = 10;
+
+    // Margins and spacing
+    const marginLeft = 40;
+    const marginTop = 550;
+    const lineHeight = 20;
+    const pageLimitY = 40; // Limite antes de começar uma nova página
+
+    // Helper function to create a new page and reset the currentY
+    function addNewPage() {
+        page = pdfDoc.addPage(pageSize);
+        currentY = marginTop;
+    }
+
+    // Header
+    let currentY = marginTop;
+    page.drawText(formData.nomeEvento, { x: marginLeft, y: currentY, size: titleSize, font: boldFont, color: darkPurple });
+    page.drawText(`${formData.tipoEvento} / ${formData.localEvento}`, { x: marginLeft, y: currentY - lineHeight, size: subtitleSize, font: regularFont });
+
+    // Summary table
+    currentY -= 3 * lineHeight;
+    drawTable(page, marginLeft, currentY, 760, 6 * lineHeight, purple);
+    page.drawText("Sumário de horas por participante", { x: marginLeft + 5, y: currentY - 15, size: subtitleSize, font: boldFont });
+
+    currentY -= lineHeight;
+    const headers = ["Perfil", "Participante", "Horas em refeições", "Horas pagáveis", "Horas com participação", "Total de horas"];
+    const columnWidths = [120, 200, 100, 100, 150, 100];
+
+    headers.forEach((header, index) => {
+        let xPos = marginLeft + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
+        let columnWidth = columnWidths[index];
+        let textWidth = header.length * (normalSize / 2); // Estimativa aproximada da largura do texto
+        let centeredX = xPos + (columnWidth - textWidth) / 2;
+        page.drawText(header, { x: centeredX, y: currentY - 15, size: normalSize, font: boldFont });
+    });
+
+    currentY -= lineHeight;
+    for (let i = 0; i < participantes.length; i++) {
+        // Checar se precisa de uma nova página
+        if (currentY - lineHeight < pageLimitY) {
+            addNewPage();
+        }
+
+        const rowData = [
+            tipos[i],
+            nomeParticipantes[i],
+            horasRefeicoes[i],
+            horasPagaveis[i],
+            horasParticipacaoAtiva[i],
+            horasTotais[i]
+        ];
+
+        rowData.forEach((data, index) => {
+            let xPos = marginLeft + columnWidths.slice(0, index).reduce((a, b) => a + b, 0);
+            let columnWidth = columnWidths[index];
+            let textWidth = data.toString().length * (normalSize / 2); // Estimativa aproximada da largura do texto
+            let centeredX = xPos + (columnWidth - textWidth) / 2;
+            page.drawText(data.toString(), { x: centeredX, y: currentY - 15, size: normalSize, font: regularFont });
+        });
+
+        currentY -= lineHeight;
+    }
+
+    // Activities
+    currentY -= 3 * lineHeight;
+    page.drawText("Atividades agendadas", { x: marginLeft, y: currentY, size: titleSize, font: boldFont, color: darkPurple });
+    currentY -= 3 * lineHeight;
+    for (let i = 0; i < atividades.length; i++) {
+        // Checar se precisa de uma nova página
+        if (currentY - 5 * lineHeight < pageLimitY) {
+            addNewPage();
+        }
+
+        currentY -= 2 * lineHeight;
+        let activityHeight = 5 * lineHeight;
+        drawTable(page, marginLeft, currentY, 760, activityHeight, purple);
+
+        page.drawText(atividades[i], { x: marginLeft + 5, y: currentY - 15, size: subtitleSize, font: boldFont });
+        page.drawText(salaLink[i], { x: marginLeft + 5, y: currentY - 35, size: normalSize, font: regularFont });
+        page.drawText(`Palestrantes: ${listaPalestrantes[i]}`, { x: marginLeft + 5, y: currentY - 55, size: normalSize, font: regularFont });
+        page.drawText(`Data: ${dataAtividade[i]}`, { x: marginLeft + 400, y: currentY - 15, size: normalSize, font: boldFont });
+        page.drawText(timeInit[i], { x: marginLeft + 650, y: currentY - 15, size: normalSize, font: boldFont });
+        page.drawText(' a ', { x: marginLeft + 675, y: currentY - 15, size: normalSize, font: boldFont });
+        page.drawText(timeEnd[i], { x: marginLeft + 685, y: currentY - 15, size: normalSize, font: boldFont });
+
+
+        const participantesText = `Participantes: ${listaOutrosParticipantes[i].join(', ')}`;
+        const maxWidth = 750;
+        const words = participantesText.split(' ');
+        let line = '';
+        let yOffset = 75;
+
+        for (let word of words) {
+            if ((line + word).length * (normalSize / 2) < maxWidth) {
+                line += (line ? ' ' : '') + word;
+            } else {
+                page.drawText(line, { x: marginLeft + 5, y: currentY - yOffset, size: normalSize, font: regularFont });
+                yOffset += 20;
+                line = word;
+            }
+        }
+        if (line) {
+            page.drawText(line, { x: marginLeft + 5, y: currentY - yOffset, size: normalSize, font: regularFont });
+        }
+
+        currentY -= activityHeight + lineHeight;
+    }
+
+    function drawTable(page, x, y, width, height, color) {
+        page.drawRectangle({
+            x: x,
+            y: y - height,
+            width: width,
+            height: height,
+            borderColor: color,
+            borderWidth: 1,
+            color: rgb(0.95, 0.95, 0.95),
+        });
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    return pdfBytes;
+}
+
+async function createPDFVertic(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, 
+    outrosParticipantes, horasRefeicoes, horasPagaveis, horasParticipacaoAtiva, horasTotais, dataAtividade, timeInit, timeEnd) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const pdfDoc = await PDFDocument.create();
     const page = pdfDoc.addPage([600, 900]);

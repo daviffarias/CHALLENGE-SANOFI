@@ -350,6 +350,17 @@ footer {
     }
 }
 
+.input-error {
+    border: 2px solid red;
+    background-color: #ffe6e6;
+}
+
+.error-message {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
 #formLogin {
     
 }

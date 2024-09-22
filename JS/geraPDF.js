@@ -1,4 +1,10 @@
 document.getElementById('exportPDFButton').addEventListener('click', async function () {
+    
+    if (!validateFormFMV()) {
+        alert('Por favor, preencha todos os campos obrigatórios antes de gerar o PDF.');
+        return; // Interrompe a execução se a validação falhar
+    }
+
     // Recarregar dados mais recentes do sessionStorage
     const expertName = urlParams.get('expertName');
     const participantId = urlParams.get('participantId');
@@ -9,7 +15,7 @@ document.getElementById('exportPDFButton').addEventListener('click', async funct
     const formDataExpert = JSON.parse(sessionStorage.getItem(`paymentFormData-${participantId}`));
 
     // Agora crie o PDF com os dados mais recentes
-    const pdfBytes = await createPDF(formData, formDataExpert, expertFirstName, expertLastName);
+    const pdfBytes = await createPDFHoriz(formData, formDataExpert, expertFirstName, expertLastName);
 
     // Cria um Blob para download
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -21,7 +27,7 @@ document.getElementById('exportPDFButton').addEventListener('click', async funct
     link.click();
 });
 
-async function createPDF(formData, formDataExpert, expertFirstName, expertLastName) {
+async function createPDFHoriz(formData, formDataExpert, expertFirstName, expertLastName) {
 
     const percentageServiceHours = ((formDataExpert.serviceDuration / formDataExpert.totalPaidHours) * 100).toFixed(0);
     const percentagePrepHours = ((formDataExpert.preparationTime / formDataExpert.totalPaidHours) * 100).toFixed(0);

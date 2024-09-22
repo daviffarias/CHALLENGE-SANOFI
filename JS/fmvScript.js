@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Salvando o valor do dolar em uma constante
     getDolar();
+    updatePaymentRates();
 
     // Restaurar dados do evento do sessionStorage
     const savedEventData = JSON.parse(sessionStorage.getItem('formData'));
@@ -67,7 +68,6 @@ if (participantId) {
     }
 }
 
-
 // Função para salvar o valor do dolar em uma constante
 function getDolar() {
     fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
@@ -85,6 +85,52 @@ function updateHourlyRateUSD() {
 
     document.getElementById('hourlyRateUSD').value = (valorReal * valorDolar).toFixed(2);
 }
+
+function validateFormFMV() {
+    const hourlyRateBRL = document.getElementById('hourlyRateBRL');
+    const serviceDuration = document.getElementById('serviceDuration');
+    const preparationTime = document.getElementById('preparationTime');
+    let isValid = true;
+
+    // Remove previous errors
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(msg => msg.remove());
+    const errorInputs = document.querySelectorAll('.input-error');
+    errorInputs.forEach(input => input.classList.remove('input-error'));
+
+    // Validate hourlyRateBRL
+    if (!hourlyRateBRL.value) {
+        hourlyRateBRL.classList.add('input-error');
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = 'Campo "Hourly Rate BRL" é obrigatório.';
+        hourlyRateBRL.parentElement.appendChild(errorMsg);
+        isValid = false;
+    }
+
+    // Validate serviceDuration
+    if (!serviceDuration.value) {
+        serviceDuration.classList.add('input-error');
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = 'Campo "Service Duration" é obrigatório.';
+        serviceDuration.parentElement.appendChild(errorMsg);
+        isValid = false;
+    }
+
+    // Validate preparationTime
+    if (!preparationTime.value) {
+        preparationTime.classList.add('input-error');
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'error-message';
+        errorMsg.textContent = 'Campo "Preparation Time" é obrigatório.';
+        preparationTime.parentElement.appendChild(errorMsg);
+        isValid = false;
+    }
+
+    return isValid;
+}
+
 
 // Função para salvar os dados do formulário no sessionStorage
 function saveData() {
@@ -317,4 +363,6 @@ document.getElementById('preparationTime').addEventListener('input', calculateTo
 document.getElementById('travelTime').addEventListener('change', calculateTotalFee);
 document.getElementById('hourlyRateBRL').addEventListener('input', calculateTotalFee);
 document.getElementById('hourlyRateUSD').addEventListener('input', calculateTotalFee);
+document.getElementById('role').addEventListener('input', updatePaymentRates);
+document.getElementById('expertLevel').addEventListener('input', updatePaymentRates);
 

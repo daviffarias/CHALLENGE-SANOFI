@@ -208,9 +208,13 @@ document.addEventListener('DOMContentLoaded', () => {
         criarParticipanteDiv();
     });
 
-    function adicionarAtividade(descricao = '', salaLink = '', timeEnd = '', timeInit = '', data = '', teveRefeicao = false, palestrantes = [], outrosParticipantes = []) {
+    function adicionarAtividade(id = '', descricao = '', salaLink = '', timeEnd = '', timeInit = '', data = '', teveRefeicao = false, palestrantes = [], outrosParticipantes = []) {
         const atividadeDiv = document.createElement('div');
         atividadeDiv.classList.add('atividade');
+    
+        // Usar ID passado, ou gerar um novo
+        const atividadeId = id || generateUniqueId();
+    
         atividadeDiv.innerHTML = `
             <label for="descricaoAtividade">Descrição da Atividade:</label>
             <input type="text" name="descricaoAtividade" value="${descricao}">
@@ -228,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <select name="palestrantes" multiple></select>
             <label for="outrosParticipantes">Participação ativa requerida:</label>
             <select name="outrosParticipantes" multiple></select>
-            <button type="button" class="removerAtividade">Remover Atividade</button>
+            <button type="button" class="removerAtividade" data-id="${atividadeId}">Remover Atividade</button>
         `;
     
         const palestrantesSelect = atividadeDiv.querySelector('select[name="palestrantes"]');
@@ -243,7 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             atualizarParticipantesDisponiveis();
     
-            // Restaurar palestrantes e participantes selecionados
             palestrantes.forEach(id => choicesPalestrantes.setChoiceByValue(id));
             outrosParticipantes.forEach(id => choicesOutrosParticipantes.setChoiceByValue(id));
     
@@ -254,17 +257,44 @@ document.addEventListener('DOMContentLoaded', () => {
             outrosParticipantesSelect.addEventListener('change', () => {
                 atualizarParticipantesNoFormulario(choicesOutrosParticipantes, choicesPalestrantes);
             });
-        }, 0); // Timeout para garantir que o Choices.js já esteja inicializado
+        }, 0);
     
-        atividadeDiv.querySelector('.removerAtividade').addEventListener('click', () => {
-            participantesSelects.splice(participantesSelects.indexOf(choicesPalestrantes), 1);
-            participantesSelects.splice(participantesSelects.indexOf(choicesOutrosParticipantes), 1);
+        // Adiciona o evento de remoção de atividade
+        atividadeDiv.querySelector('.removerAtividade').addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            removerAtividade(id);
             atividadeDiv.remove();
-            atualizarParticipantesDisponiveis();
         });
     
         document.getElementById('listaAtividades').appendChild(atividadeDiv);
     }
+    
+    // Função para remover uma atividade com base no ID
+    function removerAtividade(id) {
+        // Recuperar o formData do sessionStorage
+        const formData = JSON.parse(sessionStorage.getItem('formData'));
+    
+        // Verificar se o formData e o array de atividades existem
+        if (formData && formData.atividades) {
+            // Encontrar o índice da atividade pelo ID
+            const atividadeIndex = formData.atividades.findIndex(atividade => atividade.id === id);
+    
+            if (atividadeIndex !== -1) {
+                // Remover a atividade do array de atividades
+                formData.atividades.splice(atividadeIndex, 1);
+    
+                // Atualizar o formData no sessionStorage
+                sessionStorage.setItem('formData', JSON.stringify(formData));
+    
+                console.log('Atividade removida com sucesso!');
+            } else {
+                console.error('Atividade não encontrada.');
+            }
+        } else {
+            console.error('Não foi possível remover a atividade: dados não encontrados.');
+        }
+    }
+    
 
     function atualizarParticipantesNoFormulario(selectModificado, selectOposto) {
         const valorSelecionado = selectModificado.getValue(true);
@@ -286,18 +316,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function saveData() {
         const atividades = [];
         document.querySelectorAll('.atividade').forEach(atividadeDiv => {
+            // Coletar o ID da atividade a partir do botão "Remover Atividade"
+            const id = atividadeDiv.querySelector('.removerAtividade').getAttribute('data-id');
             const descricao = atividadeDiv.querySelector('input[name="descricaoAtividade"]').value;
             const salaLink = atividadeDiv.querySelector('input[name="salaLink"]').value;
             const data = atividadeDiv.querySelector('input[name="data"]').value;
             const timeInit = atividadeDiv.querySelector('input[name="timeInit"]').value;
             const timeEnd = atividadeDiv.querySelector('input[name="timeEnd"]').value;
             const teveRefeicao = atividadeDiv.querySelector('input[name="teveRefeicao"]').checked;
+            
             // Coletar palestrantes e outros participantes
             const palestrantes = Array.from(atividadeDiv.querySelector('select[name="palestrantes"]').selectedOptions).map(option => option.value);
             const outrosParticipantes = Array.from(atividadeDiv.querySelector('select[name="outrosParticipantes"]').selectedOptions).map(option => option.value);
-            atividades.push({ descricao, salaLink, data, timeInit, timeEnd, teveRefeicao, palestrantes, outrosParticipantes});
+            
+            atividades.push({id, descricao, salaLink, data, timeInit, timeEnd, teveRefeicao, palestrantes, outrosParticipantes});
         });
-
+    
         const formData = {
             tipoEvento: document.getElementById('tipoEvento').value,
             nomeEvento: document.getElementById('nomeEvento').value,
@@ -309,9 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
             comentariosObservacoes: document.getElementById('comentariosObservacoes').value,
             atividades
         };
-
+    
         sessionStorage.setItem('formData', JSON.stringify(formData));
     }
+    
 
     function restoreData() {
         const savedData = JSON.parse(sessionStorage.getItem('formData'));
@@ -329,6 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedData.atividades) {
                 savedData.atividades.forEach(atividade => {
                     adicionarAtividade(
+                        atividade.id,
                         atividade.descricao, 
                         atividade.salaLink, 
                         atividade.timeEnd, 
@@ -338,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         atividade.palestrantes, 
                         atividade.outrosParticipantes
                     );
-                });
+                });                
             }
         }
     }
@@ -372,3 +408,61 @@ document.addEventListener('DOMContentLoaded', () => {
     // Adicionar funcionalidade ao botão de reset
     document.getElementById('resetForm').addEventListener('click', resetForm);
 });
+
+// Função para validar os campos do formulário
+function validateFormFields() {
+    let isValid = true;
+
+    // Limpa os erros anteriores
+    document.querySelectorAll('.input-error').forEach(element => {
+        element.classList.remove('input-error');
+    });
+    document.querySelectorAll('.error-message').forEach(element => {
+        element.remove();
+    });
+
+    // Validação para campos do formulário principal
+    const requiredFields = [
+        'tipoEvento', 'nomeEvento', 'dataEvento', 'localEvento',
+        'nomeSolicitante', 'unidade', 'racionalEvento'
+    ];
+    requiredFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field && !field.value.trim()) {
+            isValid = false;
+            field.classList.add('input-error');
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'error-message';
+            errorMessage.textContent = `Campo ${fieldId} é obrigatório.`;
+            field.parentNode.appendChild(errorMessage);
+        }
+    });
+
+    // Validação para atividades
+    document.querySelectorAll('.atividade').forEach(atividadeDiv => {
+        const descricao = atividadeDiv.querySelector('input[name="descricaoAtividade"]');
+        const salaLink = atividadeDiv.querySelector('input[name="salaLink"]');
+        const data = atividadeDiv.querySelector('input[name="data"]');
+        const timeInit = atividadeDiv.querySelector('input[name="timeInit"]');
+        const timeEnd = atividadeDiv.querySelector('input[name="timeEnd"]');
+
+        let atividadeValida = true;
+
+        [descricao, salaLink, data, timeInit, timeEnd].forEach(field => {
+            if (field && !field.value.trim()) {
+                atividadeValida = false;
+                field.classList.add('input-error');
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'error-message';
+                errorMessage.textContent = `Campo ${field.name} é obrigatório.`;
+                field.parentNode.appendChild(errorMessage);
+            }
+        });
+
+        if (!atividadeValida) {
+            isValid = false;
+        }
+    });
+
+    return isValid;
+}
