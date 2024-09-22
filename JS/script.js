@@ -7,11 +7,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function atualizarParticipantesDisponiveis() {
         participantesSelects.forEach(select => {
             const currentSelected = new Set(select.getValue(true));
-            const updatedChoices = Array.from(todosOsParticipantes.entries()).map(([id, nome]) => ({
+            
+            // Atualize para acessar corretamente o nome e tipo do participante
+            const updatedChoices = Array.from(todosOsParticipantes.entries()).map(([id, participante]) => ({
                 value: id,
-                label: nome,
+                label: participante.nome, // Acessa o nome do participante dentro do objeto
                 selected: currentSelected.has(id),
             }));
+            
             select.clearStore();
             select.setChoices(updatedChoices, 'value', 'label', false);
     
@@ -22,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+    
 
     function atualizarParticipantesNoFormulario(selectModificado, selectOposto, participantesEspecificos) {
         const valorSelecionado = selectModificado.getValue(true);
@@ -49,18 +53,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    function adicionarParticipante(id, nome) {
+    function adicionarParticipante(id, nome, tipo = 'expert') {
         if (!todosOsParticipantes.has(id)) {
-            todosOsParticipantes.set(id, nome);
+            todosOsParticipantes.set(id, { nome, tipo }); // Agora salva nome e tipo
+            atualizarParticipantesDisponiveis();
+            salvarParticipantesNoSessionStorage();
+        } else {
+            // Atualizar o nome ou tipo se o participante já existir
+            todosOsParticipantes.set(id, { nome, tipo });
             atualizarParticipantesDisponiveis();
             salvarParticipantesNoSessionStorage();
         }
     }
+    
     function salvarParticipantesNoSessionStorage() {
-        const participantesArray = Array.from(todosOsParticipantes, ([id, nome]) => ({ id, nome }));
+        const participantesArray = Array.from(todosOsParticipantes, ([id, participante]) => ({ 
+            id, 
+            nome: participante.nome, 
+            tipo: participante.tipo // Adiciona o tipo para salvar no sessionStorage
+        }));
         sessionStorage.setItem('participantes', JSON.stringify(participantesArray));
     }
-
+     
     // Função para remover um participante
     function removerParticipante(id) {
         const nome = todosOsParticipantes.get(id);
@@ -142,16 +156,31 @@ document.addEventListener('DOMContentLoaded', () => {
             verificarCondicoes();
         });
     
-        // Configurar eventos
+        // Atualizar o tipo de participante no sessionStorage quando o valor for alterado
+        tipoSelect.addEventListener('change', () => {
+            const novoTipo = tipoSelect.value;
+            
+            // Atualizar o tipo do participante no sessionStorage
+            const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
+            const participanteIndex = participantes.findIndex(p => p.id === participanteId);
+    
+            if (participanteIndex !== -1) {
+                participantes[participanteIndex].tipo = novoTipo;
+                sessionStorage.setItem('participantes', JSON.stringify(participantes));
+            }
+    
+            verificarCondicoes();
+        });
+    
+        // Outros eventos e verificações
         nomeInput.addEventListener('blur', () => {
             const nome = nomeInput.value.trim();
+            const tipo = tipoSelect.value;
             if (nome) {
-                adicionarParticipante(participanteId, nome);
+                adicionarParticipante(participanteId, nome, tipo);
             }
             verificarCondicoes();
         });
-        
-        tipoSelect.addEventListener('change', verificarCondicoes);
     
         abrirFormularioBtn.addEventListener('click', () => {
             const nome = nomeInput.value.trim();
@@ -168,13 +197,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('listaParticipantes').appendChild(participanteDiv);
     }
     
-
     // Carrega os participantes armazenados ao carregar a página
     const participantesArmazenados = JSON.parse(sessionStorage.getItem('participantes')) || [];
-    participantesArmazenados.forEach(({ id, nome }) => {
-        todosOsParticipantes.set(id, nome);
-        criarParticipanteDiv(nome, 'expert', id);
-    });
+    participantesArmazenados.forEach(({ id, nome, tipo }) => {
+        todosOsParticipantes.set(id, { nome, tipo }); // Agora armazena nome e tipo
+        criarParticipanteDiv(nome, tipo, id);
+    });    
 
     document.getElementById('adicionarParticipante').addEventListener('click', () => {
         criarParticipanteDiv();

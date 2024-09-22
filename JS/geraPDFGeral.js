@@ -20,7 +20,6 @@ document.getElementById('downloadPDF').addEventListener('click', async function 
     link.click();
 });
 
-
 async function createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
     const pdfDoc = await PDFDocument.create();
