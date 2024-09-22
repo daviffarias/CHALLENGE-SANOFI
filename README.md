@@ -36,11 +36,11 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] Ajustar espelhamento da Agenda -> FMV
 - [x] Corrigir salvamento (sessionStorage) e adicionar salvemento automático
 - [x] Ajustar regra de participantes de cada atividade. Participante só pode ser Palestrante **OU** Participação requerida, porém **pode** participar de outras atividades na mesma agenda
-- [ ] Conectar dados da agenda com novo PDF Geral
 - [x] Remover validação para downloadButton
 - [x] Refletir variáveis na impressão do pdf
 - [x] linkar tag botão download pdf
 - [x] Associar o participante ao tipo dele
+- [ ] Conectar dados da agenda com novo PDF Geral
 - [ ] Refletir quantidade de horas das atividades no PDF
 - [ ] Otimizar código, remover repetições e padronizar (opcional)
 
