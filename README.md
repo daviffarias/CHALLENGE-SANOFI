@@ -40,8 +40,9 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] Refletir variáveis na impressão do pdf
 - [x] linkar tag botão download pdf
 - [x] Associar o participante ao tipo dele
-- [ ] Conectar dados da agenda com novo PDF Geral
-- [ ] Refletir quantidade de horas das atividades no PDF
+- [x] Conectar dados da agenda com novo PDF Geral
+- [x] Criar um PDF Geral Horizontal
+- [x] Refletir quantidade de horas das atividades no PDF
 - [ ] Otimizar código, remover repetições e padronizar (opcional)
 
 ## Bugs:
@@ -52,3 +53,4 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] Os dados de participantes e agendas ficam salvos mesmo depois de preencher e enviar (talvez culpa do localStorage, sessionStorage pode resolver)
 - [ ] O botão de atualizar as variáveis globais retorna que atualizou, mas não funciona  
 - [x] Ao alterar o nome do participante, ele cria um novo FMV. Talvez associar o FMV a um ID invés de nome
+- [x] Ao criar novo participante, antigos retornam a Expert Externo

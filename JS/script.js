@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function atualizarParticipantesDisponiveis() {
         participantesSelects.forEach(select => {
             const currentSelected = new Set(select.getValue(true));
-            
+    
             // Atualize para acessar corretamente o nome e tipo do participante
             const updatedChoices = Array.from(todosOsParticipantes.entries()).map(([id, participante]) => ({
                 value: id,
-                label: participante.nome, // Acessa o nome do participante dentro do objeto
+                label: participante.nome,
                 selected: currentSelected.has(id),
             }));
             
@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-    }
-    
+    }    
+
 
     function atualizarParticipantesNoFormulario(selectModificado, selectOposto, participantesEspecificos) {
         const valorSelecionado = selectModificado.getValue(true);
@@ -54,17 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
 
     function adicionarParticipante(id, nome, tipo = 'Expert externo') {
+        // Verificar se o participante já existe
         if (!todosOsParticipantes.has(id)) {
-            todosOsParticipantes.set(id, { nome, tipo }); // Agora salva nome e tipo
-            atualizarParticipantesDisponiveis();
-            salvarParticipantesNoSessionStorage();
-        } else {
-            // Atualizar o nome ou tipo se o participante já existir
+            // Adicionar novo participante
             todosOsParticipantes.set(id, { nome, tipo });
-            atualizarParticipantesDisponiveis();
-            salvarParticipantesNoSessionStorage();
+        } else {
+            // Atualizar nome ou tipo do participante existente
+            const participanteExistente = todosOsParticipantes.get(id);
+            todosOsParticipantes.set(id, { nome: nome || participanteExistente.nome, tipo: tipo || participanteExistente.tipo });
         }
+        atualizarParticipantesDisponiveis();
+        salvarParticipantesNoSessionStorage();
     }
+    
     
     function salvarParticipantesNoSessionStorage() {
         const participantesArray = Array.from(todosOsParticipantes, ([id, participante]) => ({ 
@@ -159,6 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Atualizar o tipo de participante no sessionStorage quando o valor for alterado
         tipoSelect.addEventListener('change', () => {
             const novoTipo = tipoSelect.value;
+            adicionarParticipante(participanteId, nomeInput.value.trim(), novoTipo);
             
             // Atualizar o tipo do participante no sessionStorage
             const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
@@ -384,17 +387,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Você tem certeza de que deseja resetar o formulário?')) {
             // Limpar dados do formulário
             document.getElementById('eventForm').reset();
-
+            
             // Limpar atividades
             document.getElementById('listaAtividades').innerHTML = '';
-
+    
             // Limpar participantes
+            todosOsParticipantes.clear();  // Limpar o Map de participantes
             document.getElementById('listaParticipantes').innerHTML = '';
-
+            
             // Remover dados do sessionStorage
             sessionStorage.removeItem('formData');
-
-            // Remover dados dos participantes
             sessionStorage.removeItem('participantes');
         }
     }
