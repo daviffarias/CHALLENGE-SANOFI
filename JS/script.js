@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
 
-    function adicionarParticipante(id, nome, tipo = 'expert') {
+    function adicionarParticipante(id, nome, tipo = 'Expert externo') {
         if (!todosOsParticipantes.has(id)) {
             todosOsParticipantes.set(id, { nome, tipo }); // Agora salva nome e tipo
             atualizarParticipantesDisponiveis();
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
-    function criarParticipanteDiv(nome = '', tipo = 'expert', id = null) {
+    function criarParticipanteDiv(nome = '', tipo = 'Expert externo', id = null) {
         const participanteDiv = document.createElement('div');
         participanteDiv.classList.add('participante');
         
@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="text" name="nomeParticipante" value="${nome}" autocomplete='off'>
             <label for="tipoParticipante">Tipo:</label>
             <select name="tipoParticipante">
-                <option value="expert" ${tipo === 'expert' ? 'selected' : ''}>Expert Externo</option>
-                <option value="interno" ${tipo === 'interno' ? 'selected' : ''}>Staff Interno</option>
+                <option value="Expert externo" ${tipo === 'Expert externo' ? 'selected' : ''}>Expert Externo</option>
+                <option value="Staff Sanofi" ${tipo === 'Staff Sanofi' ? 'selected' : ''}>Staff Sanofi</option>
             </select>
             <button type="button" class="removerParticipante">Remover Participante</button>
             <button type="button" class="abrirFormulario" disabled>Abrir Formulário de Pagamento</button>
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function verificarCondicoes() {
             const nome = nomeInput.value.trim();
             const tipo = tipoSelect.value;
-            abrirFormularioBtn.disabled = !(nome && tipo === 'expert');
+            abrirFormularioBtn.disabled = !(nome && tipo === 'Expert externo');
         }
     
         // Atualizar o nome no sessionStorage quando o valor for alterado

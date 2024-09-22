@@ -1,24 +1,32 @@
 document.getElementById('downloadPDF').addEventListener('click', async function () {
-    // Recarregar os dados do sessionStorage antes de gerar o PDF
-    const formData = JSON.parse(sessionStorage.getItem(`formData`));
+    const formData = JSON.parse(sessionStorage.getItem('formData')) || { atividades: [] };
     const participantes = JSON.parse(sessionStorage.getItem('participantes')) || [];
+    
     const tipos = participantes.map(participante => participante.tipo);
     const nomeParticipantes = participantes.map(participante => participante.nome);
-    const atividades = formData.map(atividade => atividade.descricao);
-    const salaLink = formData.map(atividade => atividade.salaLink);
-    const listaPalestrantes = formData.map(atividade => atividade.palestrantes);
-    const outrosParticipantes = formData.map(atividade => atividade.outrosParticipantes);
+    
+    const atividades = formData.atividades.map(atividade => atividade.descricao);
+    const salaLink = formData.atividades.map(atividade => atividade.salaLink);
+    
+    // Mapeia IDs dos palestrantes para os nomes correspondentes
+    const listaPalestrantes = formData.atividades.map(atividade => 
+        atividade.palestrantes.map(idPalestrante => {
+            const palestrante = participantes.find(p => p.id === idPalestrante);
+            return palestrante ? palestrante.nome : 'Palestrante não encontrado';
+        }).join(', ')  // Junta os nomes dos palestrantes em uma string separada por vírgula
+    );
+    
+    const outrosParticipantes = formData.atividades.map(atividade => atividade.outrosParticipantes);
 
-    // Cria um Blob para download
-    const pdfBytes = await createPDF(formData,participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes);
+    // Geração do PDF
+    const pdfBytes = await createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes);
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = `Dados Agenda - ${formData.nomeEvento}.pdf`;
-
-    // Simula o clique no link para fazer o download
     link.click();
 });
+
 
 async function createPDF(formData, participantes, tipos, nomeParticipantes, atividades, salaLink, listaPalestrantes, outrosParticipantes) {
     const { PDFDocument, rgb, StandardFonts } = PDFLib;
@@ -156,7 +164,7 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
     // Obs: siga a ordem do primeiro ao último, se algum campo for vazio, coloque uma string vazia na lista ''
     var tituloAtividade = atividades;
     var nomeOuLinkPalestra = salaLink;
-    var palestrantes = [listaPalestrantes, outrosParticipantes];
+    var palestrantes = listaPalestrantes;
 
     // Variável de referência para a altura
     let alturaAtual = ultimoY - 4 * gapColunaVertical;
@@ -374,7 +382,6 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
 
     }
 
-
     // Loop das datas e horários
     var data = '30/07/2022';
     var horário = ['09:00 a 10:00', '10:00 a 11:00', '11:00 a 11:30', '11:30 a 12:00', '11:30 a 12:00'];
@@ -511,8 +518,6 @@ async function createPDF(formData, participantes, tipos, nomeParticipantes, ativ
             i++;
 
         }
-
-
 
     // // Cor do título
     // page.drawRectangle({
