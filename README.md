@@ -45,6 +45,8 @@ Para adicionar o autocomplete em algum input, siga os passos:
 - [x] Refletir quantidade de horas das atividades no PDF
 - [ ] Otimizar código, remover repetições e padronizar (opcional)  
 - [ ] Adicionar o parâmetro maxWidth no drawtext de textos grandes (comentários por exemplo) pra quebrar o texto e não deixar ele sair do limite da caixa  
+- [ ] Limpar o banco de dados e preencher com dados simulados coerentes pra apresentação final  
+
 
 ## Bugs:
 
