@@ -27,18 +27,18 @@ if (isset($_POST['action'])) {
             $suggestions[] = $row['localEvento'];
         }
         echo json_encode($suggestions);
-    
-    } elseif ($_POST['action'] == 'autocomplete_dataEvento') {
-        $stmt = $conn->prepare("SELECT DISTINCT dataEvento FROM eventos WHERE dataEvento LIKE :query");
-        $stmt->bindValue(':query', $query . '%');
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+     
+    // elseif ($_POST['action'] == 'autocomplete_dataEvento') {
+    //     $stmt = $conn->prepare("SELECT DISTINCT dataEvento FROM eventos WHERE dataEvento LIKE :query");
+    //     $stmt->bindValue(':query', $query . '%');
+    //     $stmt->execute();
+    //     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $suggestions = [];
-        foreach ($results as $row) {
-            $suggestions[] = $row['dataEvento'];
-        }
-        echo json_encode($suggestions);
+    //     $suggestions = [];
+    //     foreach ($results as $row) {
+    //         $suggestions[] = $row['dataEvento'];
+    //     }
+    //     echo json_encode($suggestions);
     
     } elseif ($_POST['action'] == 'autocomplete_nomeSolicitante') {
         $stmt = $conn->prepare("SELECT DISTINCT nomeSolicitante FROM eventos WHERE nomeSolicitante LIKE :query");

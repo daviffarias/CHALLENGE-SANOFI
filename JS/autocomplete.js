@@ -87,6 +87,12 @@ $(document).ready(function () {
     $('#eventForm').on('submit', function (e) {
         e.preventDefault();
 
+        if (!validateFormFields()) {
+            alert('Por favor, preencha todos os campos obrigatórios antes de gerar o PDF.');
+            return; // Interrompe a execução se a validação falhar
+        }
+
+
         var formData = $(this).serialize();
 
         $.ajax({
