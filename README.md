@@ -12,7 +12,7 @@ Um sistema de formulário inteligente com preenchimento automático de dados rep
 O projeto está hospedado em uma máquina virtual na Oracle Cloud, porém não está aberto para a internet por questões de segurança, sendo acessado apenas por um túnel SSH. É possível hospedar o servidor de desenvolvimento com o servidor local do PHP: 
 
 1. Instale o PHP na sua máquina
-2. Configure o php.ini dentro do diretório onde o php está instalado removendo o "**;**" da linha "sqlite"
+2. Configure o php.ini dentro do diretório onde o php está instalado removendo o "**;**" da linha ";extension=pdo_sqlite"
 3. Utilize o seguinte comando no terminal
 ```bash
 php -S localhost:8000
