@@ -63,18 +63,27 @@ if ($_SESSION['loggedin'] == false) {
 
     <h1>Painel Admin</h1>
 
-    <div>
-        <label>Variável 1:</label>
+    <div style="margin-left:20px">
+        <label>Taxa Chairman:</label>
         <span id="var1-current"></span>
-        <input type="text" id="var1-input" placeholder="Novo valor">
+        <br>
+        <input type="text" id="var1-input" placeholder="Novo valor" style="max-width:200px">
+        <br>
         <button onclick="updateVariable('var1')">Atualizar</button>
+        <br><br><br>
     </div>
 
-    <div>
-        <label>Variável 2:</label>
+    <div style="margin-left:20px">
+        <label>Limite inferior pagamento:</label>
         <span id="var2-current"></span>
-        <input type="text" id="var2-input" placeholder="Novo valor">
+        <br>
+        <select style="max-width:200px">
+            <option value="Habilitado">Habilitado</option>
+            <option value="Desabilitado">Desabilitado</option>
+        </select>
+        <br>
         <button onclick="updateVariable('var2')">Atualizar</button>
+        <br><br><br>
     </div>
 
     <footer>
