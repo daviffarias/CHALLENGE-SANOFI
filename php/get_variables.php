@@ -1,11 +1,11 @@
 <?php
-// Inclui o arquivo que contém as variáveis globais
-include 'variaveis_globais.php';
+$db = new PDO('sqlite:../database.db');
 
-// Retorna as variáveis como JSON
-header('Content-Type: application/json');
-echo json_encode([
-    'var1' => $var1,
-    'var2' => $var2,
-]);
+// Query para buscar a taxaChairman
+$query = "SELECT value FROM taxas WHERE name = 'taxaChairman'";
+$stmt = $db->query($query);
+$taxa = $stmt->fetchColumn();
+
+echo json_encode($taxa);
 ?>
+

@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const nomeParticipante = urlParams.get('expertName');
     const participantId = urlParams.get('participantId');
-    
+
     if (nomeParticipante && participantId) {
         const [nome, sobrenome] = nomeParticipante.split(' ');
         document.getElementById('expertFirstName').value = nome;
@@ -71,11 +71,11 @@ if (participantId) {
 // Função para salvar o valor do dolar em uma constante
 function getDolar() {
     fetch('https://v6.exchangerate-api.com/v6/abb2928bfdc4ed44635f504f/latest/BRL')
-    .then(response => response.json())
-    .then(data => {
-        window.valorDolar = data.conversion_rates.USD;
-    })
-    .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
+        .then(response => response.json())
+        .then(data => {
+            window.valorDolar = data.conversion_rates.USD;
+        })
+        .catch(error => console.error('Erro ao obter a taxa de câmbio:', error));
 }
 
 // Função para converter real para dólar
@@ -162,7 +162,7 @@ function saveData() {
 
 function monitorFormChanges() {
     const form = document.getElementById('paymentForm');
-    
+
     // Adiciona listeners a todos os campos do formulário
     Array.from(form.elements).forEach(element => {
         element.addEventListener('input', saveData);  // Para campos de texto, número e outros que disparam 'input'
@@ -267,37 +267,56 @@ const paymentRates = {
     'tier 5 generalist': { min: 315, standard: 350, max: 385 }
 };
 
+
+
+// Função para atualizar as taxas com base no nível do expert e papel
 // Função para atualizar as taxas com base no nível do expert e papel
 function updatePaymentRates() {
     const expertLevel = document.getElementById('expertLevel').value;
     const role = document.getElementById('role').value;
     const rates = paymentRates[expertLevel];
+    let valorCasoSejaChairman = 1; // valor padrão se não for Chairman
 
     if (rates) {
-        let minRate = rates.min;
-        let standardRate = rates.standard;
-        let maxRate = rates.max;
-
-        // Verificar se o papel é "Chairman" e multiplicar as taxas por 1,2
+        // Obter o valor de Chairman via AJAX
         if (role === 'Chairman') {
-            minRate *= 1.2;
-            standardRate *= 1.2;
-            maxRate *= 1.2;
+            fetch('../php/get_variables.php')
+                .then(response => response.json())
+                .then(data => {
+                    valorCasoSejaChairman = data; // Atribui o valor retornado
+
+                    let minRate = rates.min * valorCasoSejaChairman;
+                    let standardRate = rates.standard * valorCasoSejaChairman;
+                    let maxRate = rates.max * valorCasoSejaChairman;
+
+                    document.getElementById('minRate').value = minRate.toFixed(2);
+                    document.getElementById('standardRate').value = standardRate.toFixed(2);
+                    document.getElementById('maxRate').value = maxRate.toFixed(2);
+
+                    // Validar se a taxa por hora está dentro do intervalo recomendado
+                    validateHourlyRate(minRate, maxRate);
+                })
+                .catch(error => console.error('Erro ao obter o valor:', error));
+        } else {
+            let minRate = rates.min;
+            let standardRate = rates.standard;
+            let maxRate = rates.max;
+
+            document.getElementById('minRate').value = minRate.toFixed(2);
+            document.getElementById('standardRate').value = standardRate.toFixed(2);
+            document.getElementById('maxRate').value = maxRate.toFixed(2);
+
+            // Validar se a taxa por hora está dentro do intervalo recomendado
+            validateHourlyRate(minRate, maxRate);
         }
-
-        document.getElementById('minRate').value = minRate.toFixed(2);
-        document.getElementById('standardRate').value = standardRate.toFixed(2);
-        document.getElementById('maxRate').value = maxRate.toFixed(2);
-
-        // Validar se a taxa por hora está dentro do intervalo recomendado
-        validateHourlyRate(minRate, maxRate);
     }
 }
+
 
 // Função para validar a taxa por hora e alterar a cor do campo conforme necessário
 function validateHourlyRate(minRate, maxRate) {
     const hourlyRateBRL = parseFloat(document.getElementById('hourlyRateBRL').value);
-    
+
     // Verifica se o valor está dentro do intervalo e altera a cor do campo
     if (!isNaN(hourlyRateBRL)) {
         if (hourlyRateBRL < minRate || hourlyRateBRL > maxRate) {
@@ -317,7 +336,7 @@ document.getElementById('role').addEventListener('change', updatePaymentRates);
 document.getElementById('hourlyRateBRL').addEventListener('input', () => {
     const minRate = parseFloat(document.getElementById('minRate').value);
     const maxRate = parseFloat(document.getElementById('maxRate').value);
-    
+
     // Validar a taxa por hora ao inserir manualmente
     validateHourlyRate(minRate, maxRate);
 });
