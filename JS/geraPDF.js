@@ -564,6 +564,7 @@ page.drawText(formDataExpert.additionalInfo, {
     y: 281.5,
     size: 8,
     color: rgb(0, 0, 0),
+    maxWidth: 500,
 });
 
 // Footer
