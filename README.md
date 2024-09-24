@@ -1,59 +1,80 @@
-# FormEase
+# **FormEase**
 
-    Formulário com preenchimento automático de campos repetidos e autocomplete.
+Um sistema de formulário inteligente com preenchimento automático de dados replicados, autocomplete e geração de PDFs personalizados.
 
-## Status
+## **Status do Projeto**
+- **Autocomplete:** Implementado nos campos necessários.
+- **Sistema de Login Admin:** Permite controle de variáveis globais para facilitar mudanças nos cálculos do formulário.
+- **PDFs Personalizados:** Dois PDFs estilizados prontos seguindo os padrões já utilizados pela empresa e com melhorias na formatação.
 
-- O autocomplete já está funcionando para os inputs necessários.
-- O sistema de login admin está funcionando para controlar variáveis globais (tabela users)
-- Os dois PDFs estão estilizados
-- **FALTA USAR AS VARIÁVEIS GLOBAIS NO JAVASCRIPT**
-  
+## **Como acessar**
 
-## Adicionar autocomplete
+O projeto está hospedado em uma máquina virtual na Oracle Cloud, porém não está aberto para a internet por questões de segurança, sendo acessado apenas por um túnel SSH. É possível hospedar o servidor de desenvolvimento com o servidor local do PHP: 
 
-Para adicionar o autocomplete em algum input, siga os passos:
-
-1. Crie o input e dê um id e um nome;
-2. Crie uma div embaixo do input com o id: idDoInput+Suggestions Ex: nomeEventoSuggestions;
-3. Utilize a função setupAutocomplete no javascript passando os seguintes parâmetros:
-    1. id do input;
-    2. id da div;
-    3. nome arbitrário do evento, que será utilizado no script php.
- 4. Atualize o autocomplete_style adicionando o id da div em todos os blocos;
- 5. Copie o if ($_POST['action']) do php, sendo que a action será o nome arbitrário escolhido no passo 3.3;
-
-## TODO:
-
-- [x] Personalizar o PDF com alguma biblioteca javascript & Validar se todos os campos estão refletidos no PDF
-- [x] Modelar o banco de dados para ter colunas para cada campo que terá autocomplete  
-- [x] Atualizar os campos que estão faltantes do FMV novo  
-- [x] Criar algum tipo de perfil admin que tenha controle das variáveis globais para controlar o comportamento global do formulário   
-**Ex:** valorTaxaKm = 5  
-- [x] Possivelmente criar sistema de login com apenas uma conta (admin), botão de acesso na tela inicial  
-- [x] Adicionar o parâmetro autocomplete="off" em inputs (como o de contato na página inicial) para parar de autocompletar com dados do navegador
-- [x] Tempo de Viagem: Colocar o calculo do pagamento de acordo com as faixas de km de deslocamento  
-- [x] Ajustar espelhamento da Agenda -> FMV
-- [x] Corrigir salvamento (sessionStorage) e adicionar salvemento automático
-- [x] Ajustar regra de participantes de cada atividade. Participante só pode ser Palestrante **OU** Participação requerida, porém **pode** participar de outras atividades na mesma agenda
-- [x] Remover validação para downloadButton
-- [x] Refletir variáveis na impressão do pdf
-- [x] linkar tag botão download pdf
-- [x] Associar o participante ao tipo dele
-- [x] Conectar dados da agenda com novo PDF Geral
-- [x] Criar um PDF Geral Horizontal
-- [x] Refletir quantidade de horas das atividades no PDF
-- [ ] Otimizar código, remover repetições e padronizar (opcional)  
-- [x] Adicionar o parâmetro maxWidth no drawtext de textos grandes (comentários por exemplo) pra quebrar o texto e não deixar ele sair do limite da caixa  
-- [ ] Limpar o banco de dados e preencher com dados simulados coerentes pra apresentação final  
+1. Instale o PHP na sua máquina
+2. Configure o php.ini dentro do diretório onde o php está instalado removendo o "**;**" da linha "sqlite"
+3. Utilize o seguinte comando no terminal
+```bash
+php -S localhost:8000
+```
+4. Acesse a URL **localhost:8000** no seu navegador.
 
 
-## Bugs:
+## **Como Adicionar Autocomplete**
+Para configurar o autocomplete em um campo, siga os passos:
 
-- [x] Quando eu preencho todo o formulário de pagamento de algum participante, o que eu já tinha preenchido no formulário do evento some  
-- [x] Atualmente os participantes da agenda só podem participar de uma atividade. Segundo a regra da Sanofi, eles podem participar de várias atividades dentro de um evento/agenda  
-- [x] O botão de baixar dados combinados (pdf) as vezes não funciona, não consegui identificar o motivo  
-- [x] Os dados de participantes e agendas ficam salvos mesmo depois de preencher e enviar (talvez culpa do localStorage, sessionStorage pode resolver)
-- [ ] O botão de atualizar as variáveis globais retorna que atualizou, mas não funciona  
-- [x] Ao alterar o nome do participante, ele cria um novo FMV. Talvez associar o FMV a um ID invés de nome
-- [x] Ao criar novo participante, antigos retornam a Expert Externo
+1. **Criar o Input:**
+   - Crie um `input` com `id` e `name` únicos.
+   
+2. **Adicionar Div de Sugestões:**
+   - Crie uma `div` logo abaixo do input com o `id`: `<idDoInput>Suggestions`.  
+        Ex: `nomeEventoSuggestions`.
+   
+3. **Configurar a Função JavaScript:**
+   - No JavaScript, utilize a função `setupAutocomplete` passando os seguintes parâmetros:
+     1. **ID do Input;**
+     2. **ID da Div de Sugestões;**
+     3. Nome arbitrário do evento (usado no script PHP).
+
+4. **Atualizar Estilo de Autocomplete:**
+   - Adicione o `id` da div criada em todos os blocos dentro do arquivo `autocomplete_style`.
+
+5. **PHP Backend:**
+   - No script PHP, copie o bloco `if ($_POST['action'])`, e configure a `action` com o nome arbitrário escolhido no passo 3.3.
+
+---
+
+## **TODO**
+
+- [x] Personalizar o PDF com alguma biblioteca JavaScript & validar se todos os campos estão refletidos no PDF.
+- [x] Modelar o banco de dados para ter colunas para cada campo com autocomplete.
+- [x] Atualizar campos faltantes do novo FMV.
+- [x] Criar sistema de login (apenas admin) com controle das variáveis globais para controlar o comportamento do formulário.
+  - **Ex:** `taxaChairman = 1.2`
+- [x] Adicionar `autocomplete="off"` em inputs específicos para desativar preenchimento automático do navegador.
+- [x] Cálculo de pagamento baseado nas faixas de km de deslocamento.
+- [x] Ajustar espelhamento da Agenda -> FMV.
+- [x] Corrigir salvamento com `sessionStorage` e adicionar salvamento automático.
+- [x] Ajustar regra de participantes em atividades (um participante pode ser palestrante OU participação requerida, mas pode participar de várias atividades).
+- [x] Remover validação para `downloadButton`.
+- [x] Refletir variáveis na impressão do PDF.
+- [x] Linkar tag do botão de download do PDF.
+- [x] Associar participante ao tipo.
+- [x] Conectar dados da agenda com novo PDF Geral.
+- [x] Criar um PDF Geral em formato horizontal.
+- [x] Refletir quantidade de horas das atividades no PDF.
+- [x] Adicionar o parâmetro `maxWidth` no `drawtext` para textos longos (como comentários) e evitar que ultrapassem o limite da caixa.
+- [x] Limpar banco de dados e preencher com dados simulados para apresentação final.
+- [ ] Otimizar código, remover repetições e padronizar (opcional).
+
+---
+
+## **Bugs**
+
+- [x] Preencher o formulário de pagamento faz o formulário do evento perder dados preenchidos.
+- [x] Participantes da agenda podem participar de múltiplas atividades, conforme regra da Sanofi.
+- [x] O botão de baixar PDF combinado às vezes falha sem razão aparente.
+- [x] Dados de participantes e agendas persistem após envio (possivelmente causado pelo `localStorage`; `sessionStorage` pode resolver).
+- [x] O botão de atualização de variáveis globais retorna sucesso, mas não aplica as alterações.
+- [x] Alterar o nome do participante cria um novo FMV, deveria associar FMV por ID.
+- [x] Criar novo participante altera participantes anteriores para "Expert Externo".
