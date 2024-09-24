@@ -1,33 +1,21 @@
 <?php
-// Recebe os dados da requisição
 $data = json_decode(file_get_contents('php://input'), true);
-
 $variable = $data['variable'];
 $value = $data['value'];
 
-// Verifica se o valor é um número
-if (!is_numeric($value)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Valor inválido']);
-    exit;
-}
+// Verifica se a variável é 'chairman'
+if ($variable === 'chairman') {
+    // Conectar ao banco de dados SQLite
+    $db = new PDO('sqlite:../database.db');
 
-// Atualiza o arquivo com as variáveis
-$file = 'variaveis_globais.php';
-$content = file_get_contents($file);
-
-// Atualiza a variável correta no conteúdo do arquivo
-if ($variable === 'var1') {
-    $content = preg_replace("/(\$var1\s*=\s*)\d+;/", "\$var1 = $value;", $content);
-} elseif ($variable === 'var2') {
-    $content = preg_replace("/(\$var2\s*=\s*)\d+;/", "\$var2 = $value;", $content);
-}
-
-// Escreve as alterações de volta no arquivo
-if (file_put_contents($file, $content)) {
-    echo json_encode(['status' => 'success']);
-} else {
-    http_response_code(500);
-    echo json_encode(['error' => 'Erro ao atualizar o arquivo']);
+    // Atualizar o valor no banco de dados
+    $stmt = $db->prepare("UPDATE taxas SET value = :value WHERE name = 'taxaChairman'");
+    $stmt->bindValue(':value', $value); 
+    
+    if ($stmt->execute()) {
+        http_response_code(200);
+    } else {
+        http_response_code(500); // Erro ao atualizar
+    }
 }
 ?>

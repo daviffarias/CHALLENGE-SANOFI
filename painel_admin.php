@@ -4,9 +4,6 @@ if ($_SESSION['loggedin'] == false) {
     header('Location: ../index.html');
     exit();
 }
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -16,43 +13,39 @@ if ($_SESSION['loggedin'] == false) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../CSS/style.css">
     <link rel="stylesheet" href="../CSS/admin.css">
-    <title>Login</title>
+    <title>Painel Admin</title>
     <script>
-        async function loadVariables() {
+        async function loadChairmanValue() {
             const response = await fetch('./php/get_variables.php');
             const data = await response.json();
-
-            document.getElementById('var1-current').innerText = data.var1;
-            document.getElementById('var2-current').innerText = data.var2;
+            document.getElementById('chairman-current').innerText = data; // Supondo que 'chairman' seja o nome da variável
         }
 
-        async function updateVariable(variableName) {
-            const newValue = document.getElementById(variableName + '-input').value;
+        async function updateChairmanValue() {
+            const newValue = document.getElementById('chairman-input').value;
 
             const response = await fetch('./php/update_variables.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ variable: variableName, value: newValue })
+                body: JSON.stringify({ variable: 'chairman', value: newValue })
             });
 
             if (response.ok) {
                 alert('Valor atualizado com sucesso!');
-                loadVariables(); // Recarrega as variáveis atualizadas
+                loadChairmanValue(); // Recarrega o valor atualizado
             } else {
                 alert('Erro ao atualizar o valor.');
             }
         }
 
-        window.onload = loadVariables;
+        window.onload = loadChairmanValue;
     </script>
 </head>
 
 <body>
-
     <header>
         <div class="header-content">
-            <img src="https://logodownload.org/wp-content/uploads/2018/09/sanofi-logo-1-1.png" alt="Sanofi Logo"
-                class="logo">
+            <img src="https://logodownload.org/wp-content/uploads/2018/09/sanofi-logo-1-1.png" alt="Sanofi Logo" class="logo">
             <h1>FusionTech</h1>
             <div class="header-buttons">
                 <a href="formulario_evento.html" class="btn header-btn">Cadastro de Evento</a>
@@ -65,25 +58,12 @@ if ($_SESSION['loggedin'] == false) {
 
     <div style="margin-left:20px">
         <label>Taxa Chairman:</label>
-        <span id="var1-current"></span>
+        <span id="chairman-current"></span>
         <br>
-        <input type="text" id="var1-input" placeholder="Novo valor" style="max-width:200px">
+        <input type="text" id="chairman-input" placeholder="Novo valor" style="max-width:200px">
         <br>
-        <button onclick="updateVariable('var1')">Atualizar</button>
-        <br><br><br>
-    </div>
-
-    <div style="margin-left:20px">
-        <label>Limite inferior pagamento:</label>
-        <span id="var2-current"></span>
-        <br>
-        <select style="max-width:200px">
-            <option value="Habilitado">Habilitado</option>
-            <option value="Desabilitado">Desabilitado</option>
-        </select>
-        <br>
-        <button onclick="updateVariable('var2')">Atualizar</button>
-        <br><br><br>
+        <button onclick="updateChairmanValue()">Atualizar</button>
+        <br><br>
     </div>
 
     <footer>
