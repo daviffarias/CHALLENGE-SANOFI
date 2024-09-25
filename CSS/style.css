@@ -5,7 +5,8 @@ body {
     line-height: 1.6;
     color: #333;
     background-color: #f4f4f4;
-    padding-top: 80px; /* Espaço para o cabeçalho fixo */
+    padding-top: 80px;
+    /* Espaço para o cabeçalho fixo */
 }
 
 /* Cabeçalho */
@@ -36,7 +37,8 @@ header {
     margin-right: 20px;
 }
 
-h1, h3 {
+h1,
+h3 {
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 20px;
@@ -47,7 +49,8 @@ h1, h3 {
 /* Estilo dos Botões do Cabeçalho */
 .header-buttons {
     display: flex;
-    gap: 10px; /* Espaço entre os botões */
+    gap: 10px;
+    /* Espaço entre os botões */
 }
 
 .header-btn {
@@ -206,7 +209,7 @@ h1, h3 {
 
 /* Botões Gerais */
 .btn {
-    background-color: #4a148c;
+    background-color: #3e1174;
     color: #fff;
     padding: 10px 20px;
     border-radius: 5px;
@@ -280,7 +283,9 @@ button[type="submit"]:hover {
 }
 
 /* Seções do Formulário */
-#dadosEvento, #participantes, #agenda {
+#dadosEvento,
+#participantes,
+#agenda {
     margin-bottom: 30px;
 }
 
@@ -307,12 +312,17 @@ button[type="submit"]:hover {
     from {
         opacity: 0;
     }
+
     to {
         opacity: 1;
     }
 }
 
-form, #dadosEvento, #participantes, #agenda, .btn {
+form,
+#dadosEvento,
+#participantes,
+#agenda,
+.btn {
     animation: fadeIn 0.5s ease-in-out;
 }
 
@@ -345,7 +355,8 @@ footer {
         padding: 15px;
     }
 
-    h1, h3 {
+    h1,
+    h3 {
         font-size: 20px;
     }
 }
@@ -361,6 +372,4 @@ footer {
     margin-top: 5px;
 }
 
-#formLogin {
-    
-}
+#formLogin {}
