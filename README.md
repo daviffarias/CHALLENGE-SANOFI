@@ -1,6 +1,6 @@
 # **FormEase**
 
-Um sistema de formulário inteligente com preenchimento automático de dados replicados, autocomplete e geração de PDFs personalizados.
+Um sistema de formulário inteligente com preenchimento automático de dados replicados, autocomplete e geração de PDFs personalizados. O foco do nosso projeto é aumentar a velocidade com que os profissionais da Sanofi preenchem formulários, para que o tempo deles possa ser utilizado em tarefas com maior valor agregado.
 
 ## **Status do Projeto**
 - **Autocomplete:** Implementado nos campos necessários.
